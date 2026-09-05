@@ -1,5 +1,12 @@
 # pixel-forge
 ⚔️ Pixel Forge - A powerful dungeon level designer with dark/light themes, export/import, and real-time editing.
+
+## 🎮 **Try It Now**
+
+👉 **[Click here to open Pixel Forge](https://pixel-clover.github.io/pixel-forge/pixel-forge-page.html)** 👈
+
+*No installation required - runs directly in your browser!*
+
 # ⚔️ Pixel Forge
 
 **Pixel Forge** is a professional, browser-based dungeon level designer built for game developers, RPG creators, and world-builders. Create intricate dungeon layouts with an intuitive drag-and-drop interface, real-time editing, and powerful export/import capabilities.
