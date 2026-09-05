@@ -1,57 +1,57 @@
-# pixel-forge
-⚔️ Pixel Forge - A powerful dungeon level designer with dark/light themes, export/import, and real-time editing.
+Pixel Forge
+Pixel Forge is a browser-based dungeon level designer for game developers, RPG creators, and world-builders. You can create intricate dungeon layouts with a drag-and-drop interface, edit in real time, and export or import your work.
 
-## 🎮 **Try It Now**
+It works well for tabletop RPGs, video game level design, and quick prototyping. The project is maintained by Pixel Clover.
 
-👉 **[Click here to open Pixel Forge](https://pixel-clover.github.io/pixel-forge/pixel-forge-page.html)** 👈
+Features
+Core design tools
+Draw rooms by clicking and dragging with snap-to-grid precision.
 
-*No installation required - runs directly in your browser!*
+Select and move any room by clicking and dragging it.
 
-# ⚔️ Pixel Forge
+Resize rooms using the white handle on each room.
 
-**Pixel Forge** is a professional, browser-based dungeon level designer built for game developers, RPG creators, and world-builders. Create intricate dungeon layouts with an intuitive drag-and-drop interface, real-time editing, and powerful export/import capabilities.
+Add doors to connect rooms with interactive anchors.
 
-Perfect for tabletop RPGs, video game level design, and quick prototyping. Built with ❤️ by [Pixel Clover](https://github.com/pixelclover).
+Create hallways between rooms with movable anchor points.
 
-## ✨ Features
+Customization
+Dark and light theme with local storage persistence.
 
-### 🏗️ Core Design Tools
-- **Draw Rooms** - Click and drag to create rooms with snap-to-grid precision
-- **Select & Move** - Click any room to select, drag to reposition
-- **Resize** - Use the white handle on any room to resize
-- **Doors** - Connect rooms with interactive door anchors
-- **Hallways** - Create corridors between rooms with movable anchor points
+Wall thickness and color controls.
 
-### 🎨 Customization
-- **Dark/Light Theme** - Toggle between dark and light modes (saved locally)
-- **Wall Controls** - Customize wall thickness and color
-- **Room Colors** - Each room can have its own color
-- **Connection Labels** - Show distance between connected rooms
+Individual colors for each room.
 
-### 🔧 Power Features
-- **Undo/Redo** - Full history with Ctrl+Z and Ctrl+Y
-- **Export/Import** - Save your levels as JSON files
-- **Mini-Map** - Overview of your entire dungeon
-- **Context Menu** - Right-click for quick actions
-- **Keyboard Shortcuts** - Professional workflow with hotkeys
-- **Room Preview** - Hover over rooms for instant info
+Connection labels that show the distance between rooms.
 
-### 🎮 Keyboard Shortcuts
-| Key | Action |
-|-----|--------|
-| `1` | Draw Mode |
-| `2` | Select Mode |
-| `3` | Door Mode |
-| `4` | Hallway Mode |
-| `Ctrl+Z` | Undo |
-| `Ctrl+Y` | Redo |
-| `Ctrl+D` | Duplicate Room |
-| `Delete` | Delete Selected |
-| `Right-click` | Context Menu |
+Power features
+Undo and redo with full history using Ctrl+Z and Ctrl+Y.
 
-## 🚀 Getting Started
+Export and import levels as JSON files.
 
-### Quick Start
-1. Clone the repository:
-```bash
+Mini-map for an overview of the entire dungeon.
+
+Context menu with right-click for quick actions.
+
+Keyboard shortcuts for a professional workflow.
+
+Room preview with instant info on hover.
+
+Keyboard shortcuts
+Key	Action
+1	Draw mode
+2	Select mode
+3	Door mode
+4	Hallway mode
+Ctrl+Z	Undo
+Ctrl+Y	Redo
+Ctrl+D	Duplicate room
+Delete	Delete selected
+Right-click	Context menu
+
+Getting started
+Quick start
+Clone the repository:
+
+bash
 git clone https://github.com/pixelclover/pixel-forge.git
