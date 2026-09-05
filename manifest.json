@@ -1,0 +1,23 @@
+{
+  "name": "Pixel Forge Dungeon Designer",
+  "short_name": "Pixel Forge",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#17191d",
+  "theme_color": "#17191d",
+  "description": "Design dungeon maps with rooms, doors, and hallways.",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

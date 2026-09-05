@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#17191d">
+  <meta name="description" content="Pixel Forge dungeon designer">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pixel Forge">
+  <title>Pixel Forge · Dungeon Designer</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="stylesheet" href="styles/theme.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+<div class="app">
+
+        <header>
+            <h1>
+                ⚔️ Pixel Forge
+                <span class="brand">✦ by Pixel Clover</span>
+            </h1>
+            <span class="version">v1.6</span>
+            <span id="projectFileName" class="version" aria-live="polite">untitled</span>
+            <span id="saveStatus" class="version" aria-live="polite">Not saved</span>
+            <span id="perfStats" class="version" aria-live="polite">renders: 0</span>
+            <div class="header-actions">
+                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">🌓</button>
+                <button id="drawTool" class="active">▣ Draw</button>
+                <button id="selectTool">↖ Select</button>
+                <button id="doorTool">🚪 Door</button>
+                <button id="hallwayTool">🛤️ Hallway</button>
+                <button id="undoBtn" title="Undo (Ctrl+Z)">↩</button>
+                <button id="redoBtn" title="Redo (Ctrl+Y)">↪</button>
+                <button id="deleteButton" class="danger">✕</button>
+                <button id="clearButton" class="danger">🗑</button>
+                <button id="installBtn" hidden>⬇️ Install</button>
+                <button id="shortcutsBtn">⌨️ Shortcuts</button>
+            </div>
+        </header>
+
+        <aside class="left">
+            <div class="panel-title">🛠 Tools</div>
+            <button class="tool active" id="drawToolSide">▣ Draw Room</button>
+            <button class="tool" id="selectToolSide">↖ Select / Move</button>
+            <button class="tool" id="doorToolSide">🚪 Place Door</button>
+            <button class="tool" id="hallwayToolSide">🛤️ Place Hallway</button>
+
+            <div class="help">
+                <b>Draw:</b> click + drag on grid.<br>
+                <b>Select:</b> click a room to select it.<br>
+                <b>Move:</b> click and drag any room.<br>
+                <b>Door:</b> click two rooms to connect.<br>
+                <b>Hallway:</b> click two rooms to connect.<br>
+                <b>Right-click:</b> for context menu.
+            </div>
+
+            <div class="shortcuts-hint">
+                <kbd>1</kbd> Draw · <kbd>2</kbd> Select · <kbd>3</kbd> Door · <kbd>4</kbd> Hallway<br>
+                <kbd>Ctrl+Z</kbd> Undo · <kbd>Ctrl+Y</kbd> Redo · <kbd>Ctrl+D</kbd> Duplicate<br>
+                <kbd>Del</kbd> Delete · <kbd>Right-click</kbd> Menu
+            </div>
+
+            <div class="brand-footer">
+                Made with ❤️ by <span class="clover">Pixel Clover</span>
+            </div>
+        </aside>
+
+        <main id="workspace" role="region" aria-label="Dungeon design workspace" aria-describedby="workspaceHelp">
+            <p id="workspaceHelp" class="sr-only">Use draw mode to create rooms. Use select mode to move and resize rooms.</p>
+            <div class="grid-layer"></div>
+            <div class="content-layer" id="contentLayer">
+                <div id="emptyMessage">
+                    🏚️ no rooms yet<br>
+                    <small>drag on the grid to create</small>
+                </div>
+            </div>
+
+            <div class="mini-map" id="miniMap">
+                <div class="mini-label">🗺️ Overview</div>
+                <canvas id="miniMapCanvas"></canvas>
+                <div class="mini-viewport" id="miniViewport"></div>
+            </div>
+
+            <div class="room-tooltip" id="roomTooltip">
+                <div class="name" id="tooltipName">Room Name</div>
+                <div class="details" id="tooltipDetails">Size: 100×80</div>
+            </div>
+
+            <div class="context-menu" id="contextMenu">
+                <button class="menu-item" data-action="select">↖ Select</button>
+                <button class="menu-item" data-action="duplicate">📋 Duplicate</button>
+                <button class="menu-item" data-action="rename">✏️ Rename</button>
+                <div class="menu-divider"></div>
+                <button class="menu-item" data-action="color">🎨 Change Color</button>
+                <div class="menu-divider"></div>
+                <button class="menu-item danger" data-action="delete">🗑 Delete</button>
+            </div>
+        </main>
+
+        <aside class="right">
+            <div class="panel-title">📐 Room Properties</div>
+            <div id="noSelection" class="selection-info">⬜ no room selected</div>
+
+            <div id="properties" style="display:none;">
+                <label>🏷️ Name</label>
+                <input id="roomName" type="text" placeholder="e.g. Hallway">
+
+                <label>🎨 Color</label>
+                <input id="roomColor" type="color">
+
+                <div class="row">
+                    <div>
+                        <label>X</label>
+                        <input id="roomX" type="number" step="1">
+                    </div>
+                    <div>
+                        <label>Y</label>
+                        <input id="roomY" type="number" step="1">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div>
+                        <label>Width</label>
+                        <input id="roomWidth" type="number" min="12" step="1">
+                    </div>
+                    <div>
+                        <label>Height</label>
+                        <input id="roomHeight" type="number" min="12" step="1">
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:6px; margin-top:10px;">
+                    <button id="deleteProperty" class="danger" style="flex:1;">🗑 Delete</button>
+                    <button id="duplicateProperty" class="success" style="flex:1;">📋 Duplicate</button>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="panel-title" style="margin-top: 0;">⚙️ Settings</div>
+
+                <label>Snap to Grid</label>
+                <div style="display:flex; gap:8px; margin-bottom:6px;">
+                    <button id="snapToggle" class="active" style="flex:1; font-size:12px;">ON</button>
+                    <button id="gridSizeBtn" style="flex:1; font-size:12px;">Grid: 28px</button>
+                </div>
+
+                <label style="margin-top:8px;">Show Connection Labels</label>
+                <div style="display:flex; gap:8px; margin-bottom:6px;">
+                    <button id="labelsToggle" class="active" style="flex:1; font-size:12px;">ON</button>
+                </div>
+
+                <label>Wall Thickness (px)</label>
+                <input type="number" id="wallThicknessInput" value="3" min="1" max="12" step="1">
+
+                <label style="margin-top:8px;">Wall Color</label>
+                <input type="color" id="wallColorInput" value="#5f6a7e">
+
+                <label style="margin-top:8px;">Door Gap Offset (px)</label>
+                <input type="number" id="doorOffsetInput" value="8" min="0" max="30" step="1">
+            </div>
+
+            <div class="settings-group">
+                <div class="panel-title">💾 Export / Import</div>
+                <div class="export-import-buttons">
+                    <button id="exportBtn" class="success">📤 Export JSON</button>
+                    <button id="importBtn" class="success">📥 Import JSON</button>
+                    <button id="exportPngBtn" class="success">🖼️ Export PNG</button>
+                    <button id="exportSvgBtn" class="success">🧩 Export SVG</button>
+                    <button id="saveProjectBtn">💾 Save Project</button>
+                    <button id="loadProjectBtn">📂 Load Last</button>
+                </div>
+                <input type="file" id="fileInput" accept=".json" style="display:none;">
+            </div>
+
+            <div class="camera-controls">
+                <button id="zoomInBtn" title="Zoom In">➕</button>
+                <span id="zoomLevel">100%</span>
+                <button id="zoomOutBtn" title="Zoom Out">➖</button>
+                <button id="resetViewBtn" title="Reset View">⌖</button>
+                <button id="fitViewBtn" title="Fit to View">⊡</button>
+            </div>
+
+            <div class="connection-list" id="connectionListContainer">
+                <div class="panel-title" style="margin-top: 16px;">🔗 Connections</div>
+                <div id="connectionList">
+                    <div style="color:var(--text-muted); font-size:12px; padding:6px 0;">no connections yet</div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <div id="srStatus" class="sr-only" aria-live="polite"></div>
+    <div id="shortcutsModal" class="modal" aria-hidden="true">
+        <div class="modal-content">
+            <h2>Keyboard shortcuts</h2>
+            <p>1 Draw · 2 Select · 3 Door · 4 Hallway</p>
+            <p>Ctrl+Z Undo · Ctrl+Y Redo · Ctrl+D Duplicate · Del Delete</p>
+            <button id="closeShortcutsBtn">Close</button>
+        </div>
+    </div>
+  <script src="js/utils.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
