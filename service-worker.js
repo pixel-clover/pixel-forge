@@ -16,15 +16,19 @@ const OFFLINE_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(OFFLINE_ASSETS)));
-  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(OFFLINE_ASSETS))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.map((key) => (key !== CACHE_NAME ? caches.delete(key) : undefined))))
+    caches.keys()
+      .then((keys) => Promise.all(keys.map((key) => (key !== CACHE_NAME ? caches.delete(key) : undefined))))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
@@ -34,6 +38,6 @@ self.addEventListener('fetch', (event) => {
       const responseClone = response.clone();
       caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
       return response;
-    }).catch(() => caches.match('./index.html')))
+    }).catch(() => caches.match('./index.html').then((response) => response || Response.error())))
   );
 });

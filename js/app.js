@@ -5,7 +5,6 @@
             const themeToggle = document.getElementById('themeToggle');
             const saveStatusEl = document.getElementById('saveStatus');
             const projectFileNameEl = document.getElementById('projectFileName');
-            const perfStatsEl = document.getElementById('perfStats');
             const srStatusEl = document.getElementById('srStatus');
             const STORAGE_KEYS = window.PixelForgeStorage.KEYS;
             let currentTheme = localStorage.getItem(STORAGE_KEYS.theme) || 'dark';
@@ -971,8 +970,9 @@
                         const type = btn.dataset.type;
                         if (type === "door" && doors[idx]) {
                             removeDoor(doors[idx]);
-                        } else if (type === "hallway" && hallways[idx]) {
-                            removeHallway(hallways[idx]);
+                        } else if (type === "hallway") {
+                            const hallwayIdx = idx - doors.length;
+                            if (hallways[hallwayIdx]) removeHallway(hallways[hallwayIdx]);
                         }
                         updateAllConnections();
                     });
@@ -1220,22 +1220,28 @@
 
                 clearTimeout(tooltipTimeout);
                 tooltipTimeout = setTimeout(() => {
-                    tooltipName.innerHTML =
-                        `<span class="color-swatch" style="background:${room.color}"></span> ${escapeHtml(room.name)}`;
+                    tooltipName.textContent = "";
+                    const swatch = document.createElement("span");
+                    swatch.className = "color-swatch";
+                    swatch.style.backgroundColor = room.color;
+                    tooltipName.appendChild(swatch);
+                    tooltipName.append(` ${room.name}`);
                     tooltipDetails.textContent =
                         `Size: ${Math.round(room.width)}×${Math.round(room.height)}  ·  #${rooms.indexOf(room) + 1}`;
 
                     let left = e.clientX + 16;
                     let top = e.clientY - 10;
 
+                    roomTooltip.style.visibility = "hidden";
+                    roomTooltip.style.display = "block";
                     const tipRect = roomTooltip.getBoundingClientRect();
-                    if (left + 160 > window.innerWidth) left = e.clientX - 170;
-                    if (top + 80 > window.innerHeight) top = window.innerHeight - 90;
+                    if (left + tipRect.width > window.innerWidth) left = e.clientX - (tipRect.width + 10);
+                    if (top + tipRect.height > window.innerHeight) top = window.innerHeight - (tipRect.height + 10);
                     if (top < 10) top = 10;
 
                     roomTooltip.style.left = left + 'px';
                     roomTooltip.style.top = top + 'px';
-                    roomTooltip.style.display = 'block';
+                    roomTooltip.style.visibility = "visible";
                 }, 300);
             });
 
@@ -1717,7 +1723,8 @@
             };
             document.getElementById("saveProjectBtn").onclick = () => {
                 const nextName = prompt("Project name:", currentProjectName);
-                if (nextName !== null && nextName.trim()) setProjectName(nextName.trim());
+                if (nextName === null) return;
+                if (nextName.trim()) setProjectName(nextName.trim());
                 persistProject(false);
                 showToast("💾 Project saved");
             };
@@ -2019,8 +2026,4 @@
                 if (!dirtySince) return;
                 persistProject(true);
             }, 30000);
-            setInterval(() => {
-                if (!perfStatsEl) return;
-                perfStatsEl.textContent = `renders: ${window.PixelForgeState.metrics.miniMapRenders} · saves: ${window.PixelForgeState.metrics.saveOperations}`;
-            }, 5000);
 })();

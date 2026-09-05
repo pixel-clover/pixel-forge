@@ -38,7 +38,6 @@ header .brand {
     border: 1px solid var(--border-secondary);
     color: var(--text-secondary);
     -webkit-text-fill-color: var(--text-secondary);
-    background: var(--bg-panel);
     transition: background var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
 }
 

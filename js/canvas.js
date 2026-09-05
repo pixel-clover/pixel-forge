@@ -9,7 +9,8 @@ window.PixelForgeCanvas = {
       canvas.width = Math.max(1, node.scrollWidth);
       canvas.height = Math.max(1, node.scrollHeight);
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#12141a';
+      const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+      ctx.fillStyle = isDark ? '#12141a' : '#e8ecf2';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
       URL.revokeObjectURL(url);
