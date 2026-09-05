@@ -1999,13 +1999,12 @@
                 }
             });
 
-            const restored = loadPersistedProject();
-            if (!restored) initDemo();
             applyAccessibilityDefaults();
             window.PixelForgeTools.bindInstallPrompt("installBtn", setSaveStatus);
             window.PixelForgeTools.registerServiceWorker(setSaveStatus);
             setProjectName(currentProjectName);
-            if (!restored) setSaveStatus("Ready");
+            setSaveStatus("Ready");
+            updateEmptyMessage();
 
             workspace.addEventListener("contextmenu", (e) => e.preventDefault());
 
