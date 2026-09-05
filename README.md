@@ -45,6 +45,7 @@ It works well for tabletop RPGs, video game level design, and quick prototyping.
 | `Right-click` | Context menu |
 
 ## Getting Started
+https://pixel-clover.github.io/pixel-forge/
 
 ### Quick Start
 
