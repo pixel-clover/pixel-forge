@@ -1,54 +1,49 @@
 # Pixel Forge
 
-Pixel Forge is a browser-based dungeon level designer for game developers, RPG creators, and world-builders. You can create intricate dungeon layouts with a drag-and-drop interface, edit in real time, and export or import your work.
+Pixel Forge is a browser-based dungeon designer for creating room layouts with doors and hallways.
 
-It works well for tabletop RPGs, video game level design, and quick prototyping. The project is maintained by [Pixel Clover](https://github.com/pixelclover).
+## Project Structure
+
+- `index.html` – app markup and script/style includes
+- `styles/theme.css` – theme variables, focus states, accessibility helpers
+- `styles/layout.css` – base layout and panel/grid structure
+- `styles/components.css` – room/door/hallway/UI component styles
+- `js/app.js` – main editor logic and event wiring
+- `js/canvas.js` – PNG/SVG export helpers
+- `js/tools.js` – install prompt + service worker registration helpers
+- `js/state.js` – lightweight runtime metrics store
+- `js/utils.js` – debounce, raf-throttle, download, and time utilities
+- `js/storage.js` – localStorage key and JSON helpers
+- `manifest.json` / `service-worker.js` – basic PWA support
 
 ## Features
 
-### Core Design Tools
+- Draw/select/move/resize dungeon rooms
+- Doors and hallways with draggable anchors
+- Undo/redo history
+- JSON export/import
+- PNG and SVG export
+- Auto-save every 30 seconds to localStorage
+- Manual save/load of latest project snapshot with timestamp status
+- Mini-map, zoom controls, and fit-to-view
+- Keyboard shortcut help modal
+- PWA manifest + offline cache via service worker
 
-- Draw rooms by clicking and dragging with snap-to-grid precision.
-- Select and move any room by clicking and dragging it.
-- Resize rooms using the white handle on each room.
-- Add doors to connect rooms with interactive anchors.
-- Create hallways between rooms with movable anchor points.
+## Accessibility
 
-### Customization
+- ARIA labeling for interactive controls
+- Live status updates for save and toast feedback
+- Focus-visible outlines for keyboard users
+- Keyboard access for workspace and mini-map
 
-- Dark and light theme with local storage persistence.
-- Wall thickness and color controls.
-- Individual colors for each room.
-- Connection labels that show the distance between rooms.
+## Responsive Breakpoints
 
-### Power Features
+- `900px` compact layout
+- `768px` tablet adjustments
+- `480px` mobile button wrapping
+- `320px` small phone fallback
 
-- Undo and redo with full history using Ctrl+Z and Ctrl+Y.
-- Export and import levels as JSON files.
-- Mini-map for an overview of the entire dungeon.
-- Context menu with right-click for quick actions.
-- Keyboard shortcuts for a professional workflow.
-- Room preview with instant info on hover.
+## Development
 
-### Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `1` | Draw mode |
-| `2` | Select mode |
-| `3` | Door mode |
-| `4` | Hallway mode |
-| `Ctrl+Z` | Undo |
-| `Ctrl+Y` | Redo |
-| `Ctrl+D` | Duplicate room |
-| `Delete` | Delete selected |
-| `Right-click` | Context menu |
-
-## Getting Started
-
-### Quick Start
-
-Clone the repository:
-
-```bash
-git clone https://github.com/pixelclover/pixel-forge.git
+This repository is static HTML/CSS/JS and does not currently include a test runner.
+Open `index.html` in a browser (or serve the directory) to use Pixel Forge.

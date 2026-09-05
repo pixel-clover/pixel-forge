@@ -1,0 +1,91 @@
+/* ===== CSS Variables for Theming ===== */
+:root {
+    --bg-primary: #17191d;
+    --bg-secondary: #1e2128;
+    --bg-panel: #1b1e26;
+    --bg-workspace: #12141a;
+    --bg-input: #11141c;
+    --bg-tooltip: #1e2128;
+    --bg-context: #1e2128;
+    --bg-minimap: rgba(15, 18, 25, 0.85);
+    --bg-toast: #2a3140;
+    --border-primary: #31363f;
+    --border-secondary: #2d323c;
+    --border-input: #313845;
+    --border-tool: #3f4552;
+    --border-active: #7b8bb0;
+    --text-primary: #eef2f6;
+    --text-secondary: #8b94a5;
+    --text-muted: #6f788a;
+    --text-dark: #434b5c;
+    --shadow-light: rgba(255, 255, 255, 0.08);
+    --shadow-dark: rgba(0, 0, 0, 0.5);
+    --color-accent: #7f9aff;
+    --color-success: #3b7a5a;
+    --color-danger: #6a3f48;
+    --grid-line: rgba(45, 51, 65, 0.4);
+    --wall-color: #5f6a7e;
+    --transition-speed: 0.3s;
+    --pixel-clover: #7f9aff;
+}
+
+[data-theme="light"] {
+    --bg-primary: #f0f2f5;
+    --bg-secondary: #e4e7ed;
+    --bg-panel: #dce0e8;
+    --bg-workspace: #e8ecf2;
+    --bg-input: #f5f7fa;
+    --bg-tooltip: #ffffff;
+    --bg-context: #ffffff;
+    --bg-minimap: rgba(240, 242, 245, 0.9);
+    --bg-toast: #e4e7ed;
+    --border-primary: #c5cbd8;
+    --border-secondary: #b8bfce;
+    --border-input: #c5cbd8;
+    --border-tool: #b8bfce;
+    --border-active: #6a7da8;
+    --text-primary: #1a1d24;
+    --text-secondary: #374056;
+    --text-muted: #6f788a;
+    --text-dark: #8a94a8;
+    --shadow-light: rgba(0, 0, 0, 0.05);
+    --shadow-dark: rgba(0, 0, 0, 0.15);
+    --color-accent: #5a6d98;
+    --color-success: #3b7a5a;
+    --color-danger: #8a4f58;
+    --grid-line: rgba(160, 170, 190, 0.4);
+    --wall-color: #8a94a8;
+    --pixel-clover: #5a6d98;
+}
+
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background var(--transition-speed), color var(--transition-speed);
+}
+
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
