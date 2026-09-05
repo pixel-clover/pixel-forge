@@ -1,0 +1,2981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Forge · Dungeon Designer</title>
+    <style>
+        /* ===== CSS Variables for Theming ===== */
+        :root {
+            --bg-primary: #17191d;
+            --bg-secondary: #1e2128;
+            --bg-panel: #1b1e26;
+            --bg-workspace: #12141a;
+            --bg-input: #11141c;
+            --bg-tooltip: #1e2128;
+            --bg-context: #1e2128;
+            --bg-minimap: rgba(15, 18, 25, 0.85);
+            --bg-toast: #2a3140;
+            --border-primary: #31363f;
+            --border-secondary: #2d323c;
+            --border-input: #313845;
+            --border-tool: #3f4552;
+            --border-active: #7b8bb0;
+            --text-primary: #eef2f6;
+            --text-secondary: #8b94a5;
+            --text-muted: #6f788a;
+            --text-dark: #434b5c;
+            --shadow-light: rgba(255, 255, 255, 0.08);
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+            --color-accent: #7f9aff;
+            --color-success: #3b7a5a;
+            --color-danger: #6a3f48;
+            --grid-line: rgba(45, 51, 65, 0.4);
+            --wall-color: #5f6a7e;
+            --transition-speed: 0.3s;
+            --pixel-clover: #7f9aff;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #e4e7ed;
+            --bg-panel: #dce0e8;
+            --bg-workspace: #e8ecf2;
+            --bg-input: #f5f7fa;
+            --bg-tooltip: #ffffff;
+            --bg-context: #ffffff;
+            --bg-minimap: rgba(240, 242, 245, 0.9);
+            --bg-toast: #e4e7ed;
+            --border-primary: #c5cbd8;
+            --border-secondary: #b8bfce;
+            --border-input: #c5cbd8;
+            --border-tool: #b8bfce;
+            --border-active: #6a7da8;
+            --text-primary: #1a1d24;
+            --text-secondary: #4a5266;
+            --text-muted: #6f788a;
+            --text-dark: #8a94a8;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-dark: rgba(0, 0, 0, 0.15);
+            --color-accent: #5a6d98;
+            --color-success: #3b7a5a;
+            --color-danger: #8a4f58;
+            --grid-line: rgba(160, 170, 190, 0.4);
+            --wall-color: #8a94a8;
+            --pixel-clover: #5a6d98;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background var(--transition-speed), color var(--transition-speed);
+        }
+
+        .app {
+            display: grid;
+            grid-template-columns: 220px 1fr 280px;
+            grid-template-rows: 54px 1fr;
+            height: 100vh;
+        }
+
+        header {
+            grid-column: 1 / 4;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
+            flex-wrap: wrap;
+            transition: background var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            background: linear-gradient(135deg, #b7c9ff, #7f9aff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        header .brand {
+            font-size: 11px;
+            background: var(--bg-panel);
+            padding: 2px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-secondary);
+            color: var(--text-secondary);
+            -webkit-text-fill-color: var(--text-secondary);
+            background: var(--bg-panel);
+            transition: background var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        header .version {
+            color: var(--text-secondary);
+            font-size: 12px;
+            background: var(--bg-panel);
+            padding: 2px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-secondary);
+            transition: background var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: 1px solid var(--border-tool);
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-active);
+        }
+
+        button.active {
+            background: #3b445a;
+            border-color: var(--border-active);
+            box-shadow: 0 0 0 1px #5f72a0;
+        }
+        [data-theme="light"] button.active {
+            background: #d0d8e8;
+            border-color: var(--border-active);
+        }
+
+        button.danger {
+            border-color: var(--color-danger);
+            color: #f2b9c4;
+        }
+        button.danger:hover {
+            background: #442a31;
+            border-color: #ac5d6c;
+        }
+        [data-theme="light"] button.danger:hover {
+            background: #e8d0d4;
+            border-color: #ac5d6c;
+        }
+
+        button.success {
+            border-color: var(--color-success);
+            color: #8fdfb0;
+        }
+        button.success:hover {
+            background: #1e3d2e;
+            border-color: #5aaa7a;
+        }
+        [data-theme="light"] button.success:hover {
+            background: #d0e8d8;
+            border-color: #5aaa7a;
+        }
+
+        .theme-toggle {
+            font-size: 16px;
+            padding: 4px 10px;
+            background: var(--bg-panel);
+            border-color: var(--border-tool);
+            transition: background var(--transition-speed), border-color var(--transition-speed);
+        }
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .left,
+        .right {
+            background: var(--bg-panel);
+            padding: 16px 14px;
+            overflow-y: auto;
+            transition: background var(--transition-speed);
+        }
+
+        .left {
+            border-right: 1px solid var(--border-secondary);
+        }
+
+        .right {
+            border-left: 1px solid var(--border-secondary);
+            background: var(--bg-secondary);
+        }
+
+        .panel-title {
+            color: var(--text-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin: 6px 0 12px;
+            font-weight: 500;
+            transition: color var(--transition-speed);
+        }
+
+        .tool {
+            width: 100%;
+            margin-bottom: 8px;
+            text-align: left;
+            background: var(--bg-secondary);
+            border-color: var(--border-secondary);
+        }
+        .tool.active {
+            border-color: var(--border-active);
+            background: var(--bg-panel);
+        }
+        [data-theme="light"] .tool.active {
+            background: #d0d8e8;
+        }
+
+        .help {
+            margin-top: 28px;
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.7;
+            border-top: 1px solid var(--border-secondary);
+            padding-top: 16px;
+            transition: color var(--transition-speed), border-color var(--transition-speed);
+        }
+        .help b {
+            color: var(--text-secondary);
+            transition: color var(--transition-speed);
+        }
+        .help kbd {
+            background: var(--bg-secondary);
+            padding: 1px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-tool);
+            transition: background var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        .brand-footer {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-secondary);
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            transition: color var(--transition-speed), border-color var(--transition-speed);
+        }
+        .brand-footer .clover {
+            color: var(--pixel-clover);
+            font-weight: 600;
+            transition: color var(--transition-speed);
+        }
+
+        #workspace {
+            position: relative;
+            overflow: hidden;
+            background-color: var(--bg-workspace);
+            cursor: grab;
+            touch-action: none;
+            transition: background var(--transition-speed);
+        }
+
+        #workspace:active {
+            cursor: grabbing;
+        }
+
+        #workspace .grid-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+            transition: background-image var(--transition-speed);
+        }
+
+        #workspace .content-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: 0 0;
+            pointer-events: auto;
+        }
+
+        .room {
+            position: absolute;
+            min-width: 12px;
+            min-height: 12px;
+            border-style: solid;
+            border-radius: 4px;
+            cursor: grab;
+            user-select: none;
+            box-shadow:
+                inset 0 0 0 1px var(--shadow-light),
+                0 2px 4px var(--shadow-dark);
+            transition: border-color 0.1s, box-shadow 0.1s, border-width 0.1s, transform 0.15s;
+            will-change: transform;
+            z-index: 2;
+        }
+
+        .room:hover {
+            transform: scale(1.02);
+            z-index: 11;
+            box-shadow:
+                0 0 20px rgba(255, 200, 100, 0.2),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+                0 4px 15px var(--shadow-dark);
+        }
+
+        .room.selected {
+            border-color: #b6c8ff !important;
+            box-shadow:
+                0 0 0 2px #5d72d9,
+                inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+                0 4px 10px var(--shadow-dark);
+            z-index: 10;
+            transform: scale(1.02);
+        }
+
+        .room .handle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            right: -7px;
+            bottom: -7px;
+            background: #eef3ff;
+            border: 2px solid #2b3140;
+            border-radius: 50%;
+            cursor: nwse-resize;
+            box-shadow: 0 1px 6px var(--shadow-dark);
+            opacity: 0.85;
+            transition: transform 0.1s;
+            z-index: 15;
+        }
+        .room .handle:hover {
+            transform: scale(1.15);
+            background: #ffffff;
+        }
+
+        .room .label {
+            position: absolute;
+            top: 4px;
+            left: 8px;
+            color: white;
+            font-size: 11px;
+            font-weight: 500;
+            text-shadow: 0 1px 6px #000000cc, 0 1px 2px #000000;
+            pointer-events: none;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            z-index: 3;
+        }
+
+        /* ===== DOOR ===== */
+        .door {
+            position: absolute;
+            background: #d4b68a;
+            border: 2px solid #6b4f32;
+            border-radius: 2px;
+            width: 16px;
+            height: 16px;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px var(--shadow-dark), inset 0 0 4px #f0d5b0;
+            z-index: 5;
+            pointer-events: none;
+            transition: 0.1s;
+        }
+        .door::after {
+            content: "🚪";
+            font-size: 12px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            filter: drop-shadow(0 1px 3px #00000099);
+        }
+        .door.highlight {
+            box-shadow: 0 0 0 3px #ffd966, 0 0 16px #ffb347;
+            border-color: #f5b042;
+            z-index: 12;
+        }
+
+        /* ===== HALLWAY ===== */
+        .hallway {
+            position: absolute;
+            background: rgba(106, 122, 142, 0.25);
+            border: 2px dashed #5a6a7e;
+            border-radius: 6px;
+            z-index: 4;
+            pointer-events: none;
+            box-shadow: inset 0 0 20px rgba(100, 140, 200, 0.15);
+            min-width: 8px;
+            min-height: 8px;
+            transition: opacity 0.2s, border-color 0.2s;
+        }
+        .hallway::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(180, 210, 255, 0.15), transparent);
+            border-radius: 4px;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        .hallway.highlight {
+            border-color: #ffd966;
+            box-shadow: 0 0 30px rgba(255, 180, 50, 0.3), inset 0 0 30px rgba(255, 180, 50, 0.1);
+        }
+
+        /* ===== ANCHORS - Always on top ===== */
+        .anchor {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            cursor: grab;
+            z-index: 20 !important; /* Force anchors to always be on top */
+            box-shadow: 0 0 12px rgba(255, 200, 50, 0.4), 0 2px 6px var(--shadow-dark);
+            transition: transform 0.15s, box-shadow 0.15s;
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+        }
+        .anchor:hover {
+            transform: translate(-50%, -50%) scale(1.25);
+            box-shadow: 0 0 20px rgba(255, 200, 50, 0.7);
+        }
+        .anchor.dragging {
+            transform: translate(-50%, -50%) scale(1.4);
+            box-shadow: 0 0 30px rgba(255, 200, 50, 0.9);
+            cursor: grabbing;
+            z-index: 30 !important;
+        }
+        .anchor-door {
+            background: #f0d5b0;
+            border: 2px solid #8b7355;
+        }
+        .anchor-door:hover {
+            background: #ffe8c8;
+        }
+        .anchor-hallway {
+            background: #ffd966;
+            border: 2px solid #b8860b;
+        }
+        .anchor-hallway:hover {
+            background: #ffe08a;
+        }
+
+        .wall-cut {
+            position: absolute;
+            background: rgba(255, 200, 50, 0.15);
+            border: 2px solid rgba(255, 200, 50, 0.4);
+            border-radius: 3px;
+            z-index: 3;
+            pointer-events: none;
+            animation: wallPulse 2s ease-in-out infinite;
+        }
+        @keyframes wallPulse {
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .connection-label {
+            position: absolute;
+            font-size: 9px;
+            color: #aab4c8;
+            background: rgba(20, 23, 30, 0.85);
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border-tool);
+            pointer-events: none;
+            z-index: 6;
+            white-space: nowrap;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            backdrop-filter: blur(4px);
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 8px var(--shadow-dark);
+            transition: background var(--transition-speed), border-color var(--transition-speed);
+        }
+        [data-theme="light"] .connection-label {
+            background: rgba(240, 242, 245, 0.9);
+            color: #4a5266;
+        }
+        .connection-label.door-label {
+            border-color: #8b7355;
+            color: #e8d5b8;
+        }
+        [data-theme="light"] .connection-label.door-label {
+            color: #8b7355;
+        }
+        .connection-label.hallway-label {
+            border-color: #5a6a7e;
+            color: #b0c4d8;
+        }
+        [data-theme="light"] .connection-label.hallway-label {
+            color: #5a6a7e;
+        }
+
+        .room-tooltip {
+            position: fixed;
+            background: var(--bg-tooltip);
+            border: 1px solid var(--border-tool);
+            border-radius: 8px;
+            padding: 10px 14px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            min-width: 140px;
+            box-shadow: 0 8px 30px var(--shadow-dark);
+            backdrop-filter: blur(8px);
+            transition: background var(--transition-speed), border-color var(--transition-speed);
+        }
+        .room-tooltip .name {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            transition: color var(--transition-speed);
+        }
+        .room-tooltip .details {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            transition: color var(--transition-speed);
+        }
+        .room-tooltip .color-swatch {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 6px;
+            vertical-align: middle;
+            border: 1px solid var(--border-tool);
+        }
+
+        .context-menu {
+            position: fixed;
+            background: var(--bg-context);
+            border: 1px solid var(--border-tool);
+            border-radius: 8px;
+            padding: 6px 0;
+            min-width: 180px;
+            z-index: 2000;
+            box-shadow: 0 8px 40px var(--shadow-dark);
+            display: none;
+            backdrop-filter: blur(12px);
+            transition: background var(--transition-speed), border-color var(--transition-speed);
+        }
+        .context-menu .menu-item {
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+            transition: background 0.1s, color var(--transition-speed);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .context-menu .menu-item:hover {
+            background: var(--bg-secondary);
+        }
+        .context-menu .menu-item.danger {
+            color: #f2b9c4;
+        }
+        .context-menu .menu-item.danger:hover {
+            background: #3a242b;
+        }
+        [data-theme="light"] .context-menu .menu-item.danger:hover {
+            background: #e8d0d4;
+        }
+        .context-menu .menu-divider {
+            height: 1px;
+            background: var(--border-secondary);
+            margin: 4px 12px;
+            transition: background var(--transition-speed);
+        }
+        .context-menu .menu-item .shortcut {
+            margin-left: auto;
+            font-size: 11px;
+            color: var(--text-muted);
+            transition: color var(--transition-speed);
+        }
+
+        .mini-map {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 160px;
+            height: 120px;
+            background: var(--bg-minimap);
+            border: 2px solid var(--border-secondary);
+            border-radius: 8px;
+            z-index: 100;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 4px 20px var(--shadow-dark);
+            overflow: hidden;
+            cursor: pointer;
+            transition: opacity 0.3s, transform 0.3s, background var(--transition-speed), border-color var(--transition-speed);
+        }
+        .mini-map:hover {
+            transform: scale(1.05);
+            border-color: var(--border-active);
+        }
+        .mini-map canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .mini-map .mini-label {
+            position: absolute;
+            top: 4px;
+            left: 8px;
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            pointer-events: none;
+            transition: color var(--transition-speed);
+        }
+        .mini-map .mini-viewport {
+            position: absolute;
+            border: 2px solid rgba(255, 200, 100, 0.6);
+            border-radius: 2px;
+            pointer-events: none;
+            background: rgba(255, 200, 100, 0.05);
+        }
+
+        label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 12px;
+            margin-bottom: 4px;
+            font-weight: 500;
+            transition: color var(--transition-speed);
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-input);
+            color: var(--text-primary);
+            border-radius: 5px;
+            font-size: 13px;
+            transition: border 0.15s, background var(--transition-speed), color var(--transition-speed), border-color var(
+                    --transition-speed);
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            border-color: var(--color-accent);
+            outline: none;
+            background: var(--bg-workspace);
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            padding: 3px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-input);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        #emptyMessage {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-dark);
+            pointer-events: none;
+            text-align: center;
+            font-size: 15px;
+            line-height: 1.8;
+            transition: color var(--transition-speed);
+        }
+        #emptyMessage small {
+            font-size: 13px;
+            opacity: 0.7;
+            display: block;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-panel);
+            transition: background var(--transition-speed);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-tool);
+            border-radius: 12px;
+            transition: background var(--transition-speed);
+        }
+
+        .selection-info {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 14px;
+            padding: 6px 0;
+            transition: color var(--transition-speed);
+        }
+
+        .settings-group {
+            margin-top: 16px;
+            border-top: 1px solid var(--border-secondary);
+            padding-top: 12px;
+            transition: border-color var(--transition-speed);
+        }
+        .settings-group label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            transition: color var(--transition-speed);
+        }
+        .settings-group input[type="number"] {
+            font-size: 12px;
+            padding: 6px 8px;
+        }
+
+        .shortcuts-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 8px 0;
+            border-top: 1px solid var(--border-secondary);
+            margin-top: 12px;
+            line-height: 1.6;
+            transition: color var(--transition-speed), border-color var(--transition-speed);
+        }
+        .shortcuts-hint kbd {
+            background: var(--bg-secondary);
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-tool);
+            transition: background var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        .connection-list {
+            margin-top: 12px;
+            border-top: 1px solid var(--border-secondary);
+            padding-top: 10px;
+            transition: border-color var(--transition-speed);
+        }
+        .connection-item {
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-secondary);
+            transition: color var(--transition-speed), border-color var(--transition-speed);
+        }
+        .connection-item button {
+            padding: 2px 10px;
+            font-size: 11px;
+            background: var(--bg-secondary);
+            border-color: var(--border-tool);
+        }
+        .connection-item button:hover {
+            background: var(--bg-panel);
+        }
+        .connection-type {
+            font-size: 10px;
+            background: var(--bg-secondary);
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: 6px;
+            color: var(--text-muted);
+            transition: background var(--transition-speed), color var(--transition-speed);
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            align-items: center;
+        }
+        .camera-controls button {
+            padding: 4px 12px;
+            font-size: 16px;
+            background: var(--bg-secondary);
+            border-color: var(--border-tool);
+        }
+        .camera-controls button:hover {
+            background: var(--bg-panel);
+        }
+        .camera-controls span {
+            color: var(--text-secondary);
+            font-size: 12px;
+            min-width: 50px;
+            text-align: center;
+            transition: color var(--transition-speed);
+        }
+
+        .export-import-buttons {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .export-import-buttons button {
+            flex: 1;
+            font-size: 11px;
+            padding: 4px 8px;
+            min-width: 60px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-toast);
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: 1px solid var(--border-tool);
+            color: var(--text-primary);
+            font-size: 13px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s, background var(--transition-speed), border-color var(--transition-speed), color var(
+                    --transition-speed);
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+
+        .selection-box {
+            position: absolute;
+            border: 2px solid #5d72d9;
+            background: rgba(93, 114, 217, 0.1);
+            pointer-events: none;
+            z-index: 50;
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .app {
+                grid-template-columns: 1fr;
+                grid-template-rows: 54px 1fr 250px;
+            }
+            .left {
+                display: none;
+            }
+            .right {
+                border-left: none;
+                border-top: 1px solid var(--border-secondary);
+                max-height: 250px;
+            }
+            header h1 {
+                font-size: 14px;
+            }
+            .header-actions button {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+
+        <header>
+            <h1>
+                ⚔️ Pixel Forge
+                <span class="brand">✦ by Pixel Clover</span>
+            </h1>
+            <span class="version">v1.6</span>
+            <div class="header-actions">
+                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">🌓</button>
+                <button id="drawTool" class="active">▣ Draw</button>
+                <button id="selectTool">↖ Select</button>
+                <button id="doorTool">🚪 Door</button>
+                <button id="hallwayTool">🛤️ Hallway</button>
+                <button id="undoBtn" title="Undo (Ctrl+Z)">↩</button>
+                <button id="redoBtn" title="Redo (Ctrl+Y)">↪</button>
+                <button id="deleteButton" class="danger">✕</button>
+                <button id="clearButton" class="danger">🗑</button>
+            </div>
+        </header>
+
+        <aside class="left">
+            <div class="panel-title">🛠 Tools</div>
+            <button class="tool active" id="drawToolSide">▣ Draw Room</button>
+            <button class="tool" id="selectToolSide">↖ Select / Move</button>
+            <button class="tool" id="doorToolSide">🚪 Place Door</button>
+            <button class="tool" id="hallwayToolSide">🛤️ Place Hallway</button>
+
+            <div class="help">
+                <b>Draw:</b> click + drag on grid.<br>
+                <b>Select:</b> click a room to select it.<br>
+                <b>Move:</b> click and drag any room.<br>
+                <b>Door:</b> click two rooms to connect.<br>
+                <b>Hallway:</b> click two rooms to connect.<br>
+                <b>Right-click:</b> for context menu.
+            </div>
+
+            <div class="shortcuts-hint">
+                <kbd>1</kbd> Draw · <kbd>2</kbd> Select · <kbd>3</kbd> Door · <kbd>4</kbd> Hallway<br>
+                <kbd>Ctrl+Z</kbd> Undo · <kbd>Ctrl+Y</kbd> Redo · <kbd>Ctrl+D</kbd> Duplicate<br>
+                <kbd>Del</kbd> Delete · <kbd>Right-click</kbd> Menu
+            </div>
+
+            <div class="brand-footer">
+                Made with ❤️ by <span class="clover">Pixel Clover</span>
+            </div>
+        </aside>
+
+        <main id="workspace">
+            <div class="grid-layer"></div>
+            <div class="content-layer" id="contentLayer">
+                <div id="emptyMessage">
+                    🏚️ no rooms yet<br>
+                    <small>drag on the grid to create</small>
+                </div>
+            </div>
+
+            <div class="mini-map" id="miniMap">
+                <div class="mini-label">🗺️ Overview</div>
+                <canvas id="miniMapCanvas"></canvas>
+                <div class="mini-viewport" id="miniViewport"></div>
+            </div>
+
+            <div class="room-tooltip" id="roomTooltip">
+                <div class="name" id="tooltipName">Room Name</div>
+                <div class="details" id="tooltipDetails">Size: 100×80</div>
+            </div>
+
+            <div class="context-menu" id="contextMenu">
+                <button class="menu-item" data-action="select">↖ Select</button>
+                <button class="menu-item" data-action="duplicate">📋 Duplicate</button>
+                <button class="menu-item" data-action="rename">✏️ Rename</button>
+                <div class="menu-divider"></div>
+                <button class="menu-item" data-action="color">🎨 Change Color</button>
+                <div class="menu-divider"></div>
+                <button class="menu-item danger" data-action="delete">🗑 Delete</button>
+            </div>
+        </main>
+
+        <aside class="right">
+            <div class="panel-title">📐 Room Properties</div>
+            <div id="noSelection" class="selection-info">⬜ no room selected</div>
+
+            <div id="properties" style="display:none;">
+                <label>🏷️ Name</label>
+                <input id="roomName" type="text" placeholder="e.g. Hallway">
+
+                <label>🎨 Color</label>
+                <input id="roomColor" type="color">
+
+                <div class="row">
+                    <div>
+                        <label>X</label>
+                        <input id="roomX" type="number" step="1">
+                    </div>
+                    <div>
+                        <label>Y</label>
+                        <input id="roomY" type="number" step="1">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div>
+                        <label>Width</label>
+                        <input id="roomWidth" type="number" min="12" step="1">
+                    </div>
+                    <div>
+                        <label>Height</label>
+                        <input id="roomHeight" type="number" min="12" step="1">
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:6px; margin-top:10px;">
+                    <button id="deleteProperty" class="danger" style="flex:1;">🗑 Delete</button>
+                    <button id="duplicateProperty" class="success" style="flex:1;">📋 Duplicate</button>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="panel-title" style="margin-top: 0;">⚙️ Settings</div>
+
+                <label>Snap to Grid</label>
+                <div style="display:flex; gap:8px; margin-bottom:6px;">
+                    <button id="snapToggle" class="active" style="flex:1; font-size:12px;">ON</button>
+                    <button id="gridSizeBtn" style="flex:1; font-size:12px;">Grid: 28px</button>
+                </div>
+
+                <label style="margin-top:8px;">Show Connection Labels</label>
+                <div style="display:flex; gap:8px; margin-bottom:6px;">
+                    <button id="labelsToggle" class="active" style="flex:1; font-size:12px;">ON</button>
+                </div>
+
+                <label>Wall Thickness (px)</label>
+                <input type="number" id="wallThicknessInput" value="3" min="1" max="12" step="1">
+
+                <label style="margin-top:8px;">Wall Color</label>
+                <input type="color" id="wallColorInput" value="#5f6a7e">
+
+                <label style="margin-top:8px;">Door Gap Offset (px)</label>
+                <input type="number" id="doorOffsetInput" value="8" min="0" max="30" step="1">
+            </div>
+
+            <div class="settings-group">
+                <div class="panel-title">💾 Export / Import</div>
+                <div class="export-import-buttons">
+                    <button id="exportBtn" class="success">📤 Export JSON</button>
+                    <button id="importBtn" class="success">📥 Import JSON</button>
+                </div>
+                <input type="file" id="fileInput" accept=".json" style="display:none;">
+            </div>
+
+            <div class="camera-controls">
+                <button id="zoomInBtn" title="Zoom In">➕</button>
+                <span id="zoomLevel">100%</span>
+                <button id="zoomOutBtn" title="Zoom Out">➖</button>
+                <button id="resetViewBtn" title="Reset View">⌖</button>
+                <button id="fitViewBtn" title="Fit to View">⊡</button>
+            </div>
+
+            <div class="connection-list" id="connectionListContainer">
+                <div class="panel-title" style="margin-top: 16px;">🔗 Connections</div>
+                <div id="connectionList">
+                    <div style="color:var(--text-muted); font-size:12px; padding:6px 0;">no connections yet</div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            // ============================================================
+            // THEME TOGGLE
+            // ============================================================
+            const themeToggle = document.getElementById('themeToggle');
+            let currentTheme = localStorage.getItem('pixel-forge-theme') || 'dark';
+
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                currentTheme = theme;
+                localStorage.setItem('pixel-forge-theme', theme);
+                themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+                setTimeout(updateMiniMap, 100);
+            }
+
+            setTheme(currentTheme);
+
+            themeToggle.addEventListener('click', () => {
+                setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+            });
+
+            // ============================================================
+            // DOM REFS
+            // ============================================================
+            const workspace = document.getElementById("workspace");
+            const contentLayer = document.getElementById("contentLayer");
+            const toast = document.getElementById("toast");
+            const roomTooltip = document.getElementById("roomTooltip");
+            const tooltipName = document.getElementById("tooltipName");
+            const tooltipDetails = document.getElementById("tooltipDetails");
+            const contextMenu = document.getElementById("contextMenu");
+            const miniMapCanvas = document.getElementById("miniMapCanvas");
+            const miniViewport = document.getElementById("miniViewport");
+
+            let toastTimeout = null;
+
+            function showToast(message, duration = 2000) {
+                toast.textContent = message;
+                toast.classList.add("show");
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => toast.classList.remove("show"), duration);
+            }
+
+            // ============================================================
+            // SETTINGS
+            // ============================================================
+            let showLabels = true;
+            let snapEnabled = true;
+            let gridSize = 28;
+            let doorOffset = 8;
+            let wallThickness = 3;
+            let wallColor = "#5f6a7e";
+
+            // ============================================================
+            // UNDO / REDO
+            // ============================================================
+            const history = [];
+            let historyIndex = -1;
+            const MAX_HISTORY = 50;
+
+            function saveState() {
+                history.splice(historyIndex + 1);
+                const state = serializeState();
+                history.push(state);
+                historyIndex = history.length - 1;
+                if (history.length > MAX_HISTORY) {
+                    history.shift();
+                    historyIndex--;
+                }
+                updateUndoButtons();
+                updateMiniMap();
+            }
+
+            function undo() {
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    restoreState(history[historyIndex]);
+                    updateUndoButtons();
+                    showToast("↩ Undo");
+                    updateMiniMap();
+                }
+            }
+
+            function redo() {
+                if (historyIndex < history.length - 1) {
+                    historyIndex++;
+                    restoreState(history[historyIndex]);
+                    updateUndoButtons();
+                    showToast("↪ Redo");
+                    updateMiniMap();
+                }
+            }
+
+            function updateUndoButtons() {
+                document.getElementById("undoBtn").style.opacity = historyIndex > 0 ? "1" : "0.3";
+                document.getElementById("redoBtn").style.opacity = historyIndex < history.length - 1 ? "1" : "0.3";
+            }
+
+            // ============================================================
+            // SERIALIZATION
+            // ============================================================
+            function serializeState() {
+                const roomData = rooms.map(r => ({
+                    x: r.x,
+                    y: r.y,
+                    width: r.width,
+                    height: r.height,
+                    name: r.name,
+                    color: r.color
+                }));
+                const doorData = doors.map(d => ({
+                    roomA: rooms.indexOf(d.roomA),
+                    roomB: rooms.indexOf(d.roomB),
+                    anchorAPos: d.anchorAPos,
+                    anchorBPos: d.anchorBPos
+                }));
+                const hallwayData = hallways.map(h => ({
+                    roomA: rooms.indexOf(h.roomA),
+                    roomB: rooms.indexOf(h.roomB),
+                    anchorAPos: h.anchorAPos,
+                    anchorBPos: h.anchorBPos
+                }));
+                return { rooms: roomData, doors: doorData, hallways: hallwayData };
+            }
+
+            function restoreState(state) {
+                rooms.forEach(r => r.element.remove());
+                rooms.length = 0;
+                doors.forEach(d => { d.element.remove();
+                    d.anchorA.remove();
+                    d.anchorB.remove();
+                    d.wallA.remove();
+                    d.wallB.remove(); });
+                doors.length = 0;
+                hallways.forEach(h => { h.element.remove();
+                    h.anchorA.remove();
+                    h.anchorB.remove();
+                    h.wallA.remove();
+                    h.wallB.remove(); });
+                hallways.length = 0;
+                document.querySelectorAll('.connection-label').forEach(el => el.remove());
+
+                const roomMap = [];
+                state.rooms.forEach((rd, i) => {
+                    const room = createRoom(rd.x, rd.y, rd.width, rd.height, rd.name, rd.color);
+                    roomMap[i] = room;
+                });
+
+                state.doors.forEach(dd => {
+                    const roomA = roomMap[dd.roomA];
+                    const roomB = roomMap[dd.roomB];
+                    if (roomA && roomB) {
+                        const door = createDoorWithAnchors(roomA, roomB);
+                        door.anchorAPos = dd.anchorAPos;
+                        door.anchorBPos = dd.anchorBPos;
+                        doors.push(door);
+                        updateDoor(door);
+                    }
+                });
+
+                state.hallways.forEach(hd => {
+                    const roomA = roomMap[hd.roomA];
+                    const roomB = roomMap[hd.roomB];
+                    if (roomA && roomB) {
+                        const hallway = createHallwayWithAnchors(roomA, roomB);
+                        hallway.anchorAPos = hd.anchorAPos;
+                        hallway.anchorBPos = hd.anchorBPos;
+                        hallways.push(hallway);
+                        updateHallway(hallway);
+                    }
+                });
+
+                selectedRoom = null;
+                updateProperties();
+                updateEmptyMessage();
+                updateAllConnections();
+                renderConnectionList();
+                highlightConnectionsForRoom(null);
+                updateConnectionLabels();
+                updateMiniMap();
+            }
+
+            // ============================================================
+            // EXPORT / IMPORT
+            // ============================================================
+            function exportLevel() {
+                const state = serializeState();
+                const json = JSON.stringify(state, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'pixel_forge_level.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast("📤 Level exported!");
+            }
+
+            function importLevel(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const state = JSON.parse(e.target.result);
+                        if (state.rooms && state.doors !== undefined && state.hallways !== undefined) {
+                            restoreState(state);
+                            saveState();
+                            showToast("📥 Level imported!");
+                        } else {
+                            showToast("❌ Invalid file format", 3000);
+                        }
+                    } catch (err) {
+                        showToast("❌ Error importing file", 3000);
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            // ============================================================
+            // GRID SNAP
+            // ============================================================
+            function snapToGrid(val) {
+                if (!snapEnabled) return val;
+                return Math.round(val / gridSize) * gridSize;
+            }
+
+            // ============================================================
+            // SETTINGS BINDING
+            // ============================================================
+            const doorOffsetInput = document.getElementById("doorOffsetInput");
+            const wallThicknessInput = document.getElementById("wallThicknessInput");
+            const wallColorInput = document.getElementById("wallColorInput");
+            const snapToggle = document.getElementById("snapToggle");
+            const gridSizeBtn = document.getElementById("gridSizeBtn");
+            const labelsToggle = document.getElementById("labelsToggle");
+
+            doorOffsetInput.addEventListener("input", () => {
+                doorOffset = Math.max(0, parseFloat(doorOffsetInput.value) || 0);
+                updateAllDoors();
+                saveState();
+            });
+
+            wallThicknessInput.addEventListener("input", () => {
+                wallThickness = Math.max(1, Math.min(12, parseFloat(wallThicknessInput.value) || 3));
+                updateAllRooms();
+                saveState();
+            });
+
+            wallColorInput.addEventListener("input", () => {
+                wallColor = wallColorInput.value;
+                updateAllRooms();
+                saveState();
+            });
+
+            snapToggle.addEventListener("click", () => {
+                snapEnabled = !snapEnabled;
+                snapToggle.textContent = snapEnabled ? "ON" : "OFF";
+                snapToggle.classList.toggle("active", snapEnabled);
+                showToast(`Snap ${snapEnabled ? "ON" : "OFF"}`);
+            });
+
+            labelsToggle.addEventListener("click", () => {
+                showLabels = !showLabels;
+                labelsToggle.textContent = showLabels ? "ON" : "OFF";
+                labelsToggle.classList.toggle("active", showLabels);
+                updateConnectionLabels();
+                showToast(`Labels ${showLabels ? "ON" : "OFF"}`);
+            });
+
+            let gridSizes = [20, 28, 40, 50];
+            let gridIndex = 1;
+
+            gridSizeBtn.addEventListener("click", () => {
+                gridIndex = (gridIndex + 1) % gridSizes.length;
+                gridSize = gridSizes[gridIndex];
+                gridSizeBtn.textContent = `Grid: ${gridSize}px`;
+                const gridLayer = workspace.querySelector(".grid-layer");
+                gridLayer.style.backgroundImage = `
+                        linear-gradient(var(--grid-line) 1px, transparent 1px),
+                        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px)
+                    `;
+                gridLayer.style.backgroundSize = `${gridSize}px ${gridSize}px`;
+                showToast(`Grid: ${gridSize}px`);
+                saveState();
+            });
+
+            // ============================================================
+            // CAMERA
+            // ============================================================
+            let camera = { x: 0, y: 0, zoom: 1 };
+
+            function updateCamera() {
+                contentLayer.style.transform = `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`;
+                document.getElementById("zoomLevel").textContent = Math.round(camera.zoom * 100) + "%";
+                updateMiniMap();
+            }
+
+            // ============================================================
+            // PAN
+            // ============================================================
+            let isPanning = false;
+            let panStartX = 0,
+                panStartY = 0;
+            let panStartCamX = 0,
+                panStartCamY = 0;
+
+            // ============================================================
+            // ROOM DATA
+            // ============================================================
+            const rooms = [];
+            const doors = [];
+            const hallways = [];
+            let selectedRoom = null;
+            let mode = "draw";
+            let drawing = false;
+            let startX = 0,
+                startY = 0;
+            let connectionFirstRoom = null;
+
+            // ============================================================
+            // HELPERS
+            // ============================================================
+            function getMousePosition(e) {
+                const rect = workspace.getBoundingClientRect();
+                const x = (e.clientX - rect.left - camera.x) / camera.zoom;
+                const y = (e.clientY - rect.top - camera.y) / camera.zoom;
+                return { x, y };
+            }
+
+            function getRoomCenter(room) {
+                return { x: room.x + room.width / 2, y: room.y + room.height / 2 };
+            }
+
+            function getClosestEdgePoint(room, point, offset = 0) {
+                const cx = room.x + room.width / 2;
+                const cy = room.y + room.height / 2;
+                const dx = point.x - cx;
+                const dy = point.y - cy;
+
+                const halfW = room.width / 2;
+                const halfH = room.height / 2;
+
+                let ex = cx + Math.max(-halfW, Math.min(halfW, dx));
+                let ey = cy + Math.max(-halfH, Math.min(halfH, dy));
+
+                const isInside = Math.abs(dx) < halfW && Math.abs(dy) < halfH;
+                if (isInside) {
+                    const distToEdge = Math.min(
+                        halfW - Math.abs(dx),
+                        halfH - Math.abs(dy)
+                    );
+                    if (distToEdge === halfW - Math.abs(dx)) {
+                        ex = cx + (dx > 0 ? halfW - offset : -halfW + offset);
+                    } else {
+                        ey = cy + (dy > 0 ? halfH - offset : -halfH + offset);
+                    }
+                } else {
+                    const clampedX = Math.max(-halfW + offset, Math.min(halfW - offset, dx));
+                    const clampedY = Math.max(-halfH + offset, Math.min(halfH - offset, dy));
+                    const distRight = Math.abs(dx - halfW);
+                    const distLeft = Math.abs(dx + halfW);
+                    const distBottom = Math.abs(dy - halfH);
+                    const distTop = Math.abs(dy + halfH);
+                    const minDist = Math.min(distRight, distLeft, distBottom, distTop);
+
+                    if (minDist === distRight) {
+                        ex = cx + halfW - offset;
+                        ey = cy + Math.max(-halfH + offset, Math.min(halfH - offset, dy));
+                    } else if (minDist === distLeft) {
+                        ex = cx - halfW + offset;
+                        ey = cy + Math.max(-halfH + offset, Math.min(halfH - offset, dy));
+                    } else if (minDist === distBottom) {
+                        ex = cx + Math.max(-halfW + offset, Math.min(halfW - offset, dx));
+                        ey = cy + halfH - offset;
+                    } else {
+                        ex = cx + Math.max(-halfW + offset, Math.min(halfW - offset, dx));
+                        ey = cy - halfH + offset;
+                    }
+                }
+
+                return { x: ex, y: ey };
+            }
+
+            function getAnchorWorldPos(room, normPos, offset = 0) {
+                const cx = room.x + room.width / 2;
+                const cy = room.y + room.height / 2;
+                const halfW = room.width / 2;
+                const halfH = room.height / 2;
+
+                const onRight = Math.abs(normPos.x - 1) < 0.001;
+                const onLeft = Math.abs(normPos.x - 0) < 0.001;
+                const onBottom = Math.abs(normPos.y - 1) < 0.001;
+                const onTop = Math.abs(normPos.y - 0) < 0.001;
+
+                let x = cx + (normPos.x - 0.5) * 2 * halfW;
+                let y = cy + (normPos.y - 0.5) * 2 * halfH;
+
+                const clampedOffset = Math.min(offset, Math.min(halfW, halfH) * 0.8);
+
+                if (onRight) {
+                    x = cx + halfW - clampedOffset;
+                    y = cy + (normPos.y - 0.5) * 2 * (halfH - clampedOffset);
+                } else if (onLeft) {
+                    x = cx - halfW + clampedOffset;
+                    y = cy + (normPos.y - 0.5) * 2 * (halfH - clampedOffset);
+                } else if (onBottom) {
+                    x = cx + (normPos.x - 0.5) * 2 * (halfW - clampedOffset);
+                    y = cy + halfH - clampedOffset;
+                } else if (onTop) {
+                    x = cx + (normPos.x - 0.5) * 2 * (halfW - clampedOffset);
+                    y = cy - halfH + clampedOffset;
+                } else {
+                    const dx = normPos.x - 0.5;
+                    const dy = normPos.y - 0.5;
+                    const clampedX = Math.max(-1, Math.min(1, dx * 2));
+                    const clampedY = Math.max(-1, Math.min(1, dy * 2));
+                    x = cx + Math.max(-halfW + clampedOffset, Math.min(halfW - clampedOffset, clampedX * halfW));
+                    y = cy + Math.max(-halfH + clampedOffset, Math.min(halfH - clampedOffset, clampedY * halfH));
+                }
+
+                return { x, y };
+            }
+
+            function normalizeEdgePoint(room, point) {
+                const cx = room.x + room.width / 2;
+                const cy = room.y + room.height / 2;
+                const halfW = room.width / 2;
+                const halfH = room.height / 2;
+
+                const dx = point.x - cx;
+                const dy = point.y - cy;
+
+                let nx = 0.5,
+                    ny = 0.5;
+                const onRight = Math.abs(dx - halfW) < 2;
+                const onLeft = Math.abs(dx + halfW) < 2;
+                const onBottom = Math.abs(dy - halfH) < 2;
+                const onTop = Math.abs(dy + halfH) < 2;
+
+                if (onRight || onLeft) {
+                    const t = (dy + halfH) / (2 * halfH);
+                    nx = onRight ? 1 : 0;
+                    ny = Math.max(0, Math.min(1, t));
+                } else if (onBottom || onTop) {
+                    const t = (dx + halfW) / (2 * halfW);
+                    nx = Math.max(0, Math.min(1, t));
+                    ny = onBottom ? 1 : 0;
+                } else {
+                    const distRight = Math.abs(dx - halfW);
+                    const distLeft = Math.abs(dx + halfW);
+                    const distBottom = Math.abs(dy - halfH);
+                    const distTop = Math.abs(dy + halfH);
+                    const minDist = Math.min(distRight, distLeft, distBottom, distTop);
+
+                    if (minDist === distRight) { nx = 1;
+                        ny = (dy + halfH) / (2 * halfH); } else if (minDist === distLeft) { nx = 0;
+                        ny = (dy + halfH) / (2 * halfH); } else if (minDist === distBottom) { nx = (dx + halfW) / (2 *
+                            halfW);
+                        ny = 1; } else { nx = (dx + halfW) / (2 * halfW);
+                        ny = 0; }
+                    nx = Math.max(0, Math.min(1, nx));
+                    ny = Math.max(0, Math.min(1, ny));
+                }
+                return { x: nx, y: ny };
+            }
+
+            // ============================================================
+            // CONNECTION HIGHLIGHTING
+            // ============================================================
+            function highlightConnectionsForRoom(room) {
+                document.querySelectorAll('.door.connected, .hallway.connected, .anchor.connected')
+                    .forEach(el => el.classList.remove('connected', 'connection-highlight'));
+
+                if (!room) return;
+
+                const connectedDoors = doors.filter(d => d.roomA === room || d.roomB === room);
+                const connectedHallways = hallways.filter(h => h.roomA === room || h.roomB === room);
+
+                connectedDoors.forEach(d => {
+                    d.element.classList.add('connected', 'connection-highlight');
+                    d.anchorA.classList.add('connected');
+                    d.anchorB.classList.add('connected');
+                });
+
+                connectedHallways.forEach(h => {
+                    h.element.classList.add('connected', 'connection-highlight');
+                    h.anchorA.classList.add('connected');
+                    h.anchorB.classList.add('connected');
+                });
+            }
+
+            // ============================================================
+            // CONNECTION LABELS
+            // ============================================================
+            function updateConnectionLabels() {
+                document.querySelectorAll('.connection-label').forEach(el => el.remove());
+
+                if (!showLabels) return;
+
+                doors.forEach(d => {
+                    const posA = getAnchorWorldPos(d.roomA, d.anchorAPos, doorOffset);
+                    const posB = getAnchorWorldPos(d.roomB, d.anchorBPos, doorOffset);
+                    const midX = (posA.x + posB.x) / 2;
+                    const midY = (posA.y + posB.y) / 2;
+                    const dist = Math.round(Math.sqrt(
+                        Math.pow(posB.x - posA.x, 2) + Math.pow(posB.y - posA.y, 2)
+                    ));
+                    const label = document.createElement('div');
+                    label.className = 'connection-label door-label';
+                    label.textContent = `🚪 ${dist}px`;
+                    label.style.left = midX + 'px';
+                    label.style.top = (midY - 18) + 'px';
+                    contentLayer.appendChild(label);
+                });
+
+                hallways.forEach(h => {
+                    const posA = getAnchorWorldPos(h.roomA, h.anchorAPos, 0);
+                    const posB = getAnchorWorldPos(h.roomB, h.anchorBPos, 0);
+                    const midX = (posA.x + posB.x) / 2;
+                    const midY = (posA.y + posB.y) / 2;
+                    const dist = Math.round(Math.sqrt(
+                        Math.pow(posB.x - posA.x, 2) + Math.pow(posB.y - posA.y, 2)
+                    ));
+                    const label = document.createElement('div');
+                    label.className = 'connection-label hallway-label';
+                    label.textContent = `🛤️ ${dist}px`;
+                    label.style.left = midX + 'px';
+                    label.style.top = (midY - 18) + 'px';
+                    contentLayer.appendChild(label);
+                });
+            }
+
+            // ============================================================
+            // DOOR
+            // ============================================================
+            function createDoorWithAnchors(roomA, roomB) {
+                const centerA = getRoomCenter(roomA);
+                const centerB = getRoomCenter(roomB);
+
+                const edgeA = getClosestEdgePoint(roomA, centerB, doorOffset);
+                const edgeB = getClosestEdgePoint(roomB, centerA, doorOffset);
+                const normA = normalizeEdgePoint(roomA, edgeA);
+                const normB = normalizeEdgePoint(roomB, edgeB);
+
+                const el = document.createElement("div");
+                el.className = "door";
+                contentLayer.appendChild(el);
+
+                const anchorA = document.createElement("div");
+                anchorA.className = "anchor anchor-door";
+                anchorA.dataset.side = "a";
+                contentLayer.appendChild(anchorA);
+
+                const anchorB = document.createElement("div");
+                anchorB.className = "anchor anchor-door";
+                anchorB.dataset.side = "b";
+                contentLayer.appendChild(anchorB);
+
+                const wallA = document.createElement("div");
+                wallA.className = "wall-cut";
+                contentLayer.appendChild(wallA);
+
+                const wallB = document.createElement("div");
+                wallB.className = "wall-cut";
+                contentLayer.appendChild(wallB);
+
+                const door = {
+                    roomA,
+                    roomB,
+                    element: el,
+                    anchorA,
+                    anchorB,
+                    wallA,
+                    wallB,
+                    anchorAPos: normA,
+                    anchorBPos: normB
+                };
+
+                let draggingAnchor = null;
+
+                function setupAnchorDrag(anchor, side) {
+                    anchor.addEventListener("mousedown", (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        if (e.button !== 0) return;
+
+                        draggingAnchor = { anchor, side, door };
+                        anchor.classList.add("dragging");
+                        document.addEventListener("mousemove", onAnchorDrag);
+                        document.addEventListener("mouseup", onAnchorDragEnd);
+                    });
+                }
+
+                function onAnchorDrag(e) {
+                    if (!draggingAnchor) return;
+                    const p = getMousePosition(e);
+                    const room = draggingAnchor.side === 'a' ? door.roomA : door.roomB;
+
+                    const edgePoint = getClosestEdgePoint(room, p, doorOffset);
+                    const norm = normalizeEdgePoint(room, edgePoint);
+
+                    if (draggingAnchor.side === 'a') {
+                        door.anchorAPos = norm;
+                    } else {
+                        door.anchorBPos = norm;
+                    }
+
+                    updateDoor(door);
+                    updateConnectionLabels();
+                }
+
+                function onAnchorDragEnd() {
+                    if (draggingAnchor) {
+                        draggingAnchor.anchor.classList.remove("dragging");
+                        draggingAnchor = null;
+                        document.removeEventListener("mousemove", onAnchorDrag);
+                        document.removeEventListener("mouseup", onAnchorDragEnd);
+                        saveState();
+                    }
+                }
+
+                setupAnchorDrag(anchorA, 'a');
+                setupAnchorDrag(anchorB, 'b');
+
+                updateDoor(door);
+                return door;
+            }
+
+            function updateDoor(door) {
+                const posA = getAnchorWorldPos(door.roomA, door.anchorAPos, doorOffset);
+                const posB = getAnchorWorldPos(door.roomB, door.anchorBPos, doorOffset);
+
+                door.anchorA.style.left = posA.x + "px";
+                door.anchorA.style.top = posA.y + "px";
+                door.anchorB.style.left = posB.x + "px";
+                door.anchorB.style.top = posB.y + "px";
+
+                door.element.style.left = ((posA.x + posB.x) / 2) + "px";
+                door.element.style.top = ((posA.y + posB.y) / 2) + "px";
+
+                updateWallCut(door.wallA, door.roomA, posA);
+                updateWallCut(door.wallB, door.roomB, posB);
+            }
+
+            function updateWallCut(wallEl, room, pos) {
+                const cx = room.x + room.width / 2;
+                const cy = room.y + room.height / 2;
+                const halfW = room.width / 2;
+                const halfH = room.height / 2;
+
+                const dx = pos.x - cx;
+                const dy = pos.y - cy;
+                const onRight = Math.abs(dx - halfW) < 3;
+                const onLeft = Math.abs(dx + halfW) < 3;
+                const onBottom = Math.abs(dy - halfH) < 3;
+                const onTop = Math.abs(dy + halfH) < 3;
+
+                const size = 16;
+                wallEl.style.width = size + "px";
+                wallEl.style.height = size + "px";
+
+                if (onRight || onLeft || onBottom || onTop) {
+                    wallEl.style.left = (pos.x - size / 2) + "px";
+                    wallEl.style.top = (pos.y - size / 2) + "px";
+                    wallEl.style.display = "block";
+                    wallEl.style.background = "rgba(255,200,50,0.15)";
+                    wallEl.style.border = "2px solid rgba(255,200,50,0.5)";
+                    wallEl.style.borderRadius = "50%";
+                } else {
+                    wallEl.style.display = "none";
+                }
+            }
+
+            function addDoor(roomA, roomB) {
+                if (roomA === roomB) return false;
+                for (let d of doors) {
+                    if ((d.roomA === roomA && d.roomB === roomB) || (d.roomA === roomB && d.roomB === roomA)) return false;
+                }
+                const door = createDoorWithAnchors(roomA, roomB);
+                doors.push(door);
+                renderConnectionList();
+                updateConnectionLabels();
+                saveState();
+                return true;
+            }
+
+            function removeDoor(door) {
+                door.element.remove();
+                door.anchorA.remove();
+                door.anchorB.remove();
+                door.wallA.remove();
+                door.wallB.remove();
+                const idx = doors.indexOf(door);
+                if (idx !== -1) doors.splice(idx, 1);
+                renderConnectionList();
+                updateConnectionLabels();
+                saveState();
+            }
+
+            function updateAllDoors() {
+                doors.forEach(d => updateDoor(d));
+            }
+
+            // ============================================================
+            // HALLWAY
+            // ============================================================
+            function createHallwayWithAnchors(roomA, roomB) {
+                const centerA = getRoomCenter(roomA);
+                const centerB = getRoomCenter(roomB);
+                const edgeA = getClosestEdgePoint(roomA, centerB, 0);
+                const edgeB = getClosestEdgePoint(roomB, centerA, 0);
+                const normA = normalizeEdgePoint(roomA, edgeA);
+                const normB = normalizeEdgePoint(roomB, edgeB);
+
+                const el = document.createElement("div");
+                el.className = "hallway";
+                contentLayer.appendChild(el);
+
+                const anchorA = document.createElement("div");
+                anchorA.className = "anchor anchor-hallway";
+                anchorA.dataset.side = "a";
+                contentLayer.appendChild(anchorA);
+
+                const anchorB = document.createElement("div");
+                anchorB.className = "anchor anchor-hallway";
+                anchorB.dataset.side = "b";
+                contentLayer.appendChild(anchorB);
+
+                const wallA = document.createElement("div");
+                wallA.className = "wall-cut";
+                contentLayer.appendChild(wallA);
+
+                const wallB = document.createElement("div");
+                wallB.className = "wall-cut";
+                contentLayer.appendChild(wallB);
+
+                const hallway = {
+                    roomA,
+                    roomB,
+                    element: el,
+                    anchorA,
+                    anchorB,
+                    wallA,
+                    wallB,
+                    anchorAPos: normA,
+                    anchorBPos: normB
+                };
+
+                let draggingAnchor = null;
+
+                function setupAnchorDrag(anchor, side) {
+                    anchor.addEventListener("mousedown", (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        if (e.button !== 0) return;
+
+                        draggingAnchor = { anchor, side, hallway };
+                        anchor.classList.add("dragging");
+                        document.addEventListener("mousemove", onAnchorDrag);
+                        document.addEventListener("mouseup", onAnchorDragEnd);
+                    });
+                }
+
+                function onAnchorDrag(e) {
+                    if (!draggingAnchor) return;
+                    const p = getMousePosition(e);
+                    const room = draggingAnchor.side === 'a' ? hallway.roomA : hallway.roomB;
+                    const edgePoint = getClosestEdgePoint(room, p, 0);
+                    const norm = normalizeEdgePoint(room, edgePoint);
+
+                    if (draggingAnchor.side === 'a') {
+                        hallway.anchorAPos = norm;
+                    } else {
+                        hallway.anchorBPos = norm;
+                    }
+                    updateHallway(hallway);
+                    updateConnectionLabels();
+                }
+
+                function onAnchorDragEnd() {
+                    if (draggingAnchor) {
+                        draggingAnchor.anchor.classList.remove("dragging");
+                        draggingAnchor = null;
+                        document.removeEventListener("mousemove", onAnchorDrag);
+                        document.removeEventListener("mouseup", onAnchorDragEnd);
+                        saveState();
+                    }
+                }
+
+                setupAnchorDrag(anchorA, 'a');
+                setupAnchorDrag(anchorB, 'b');
+
+                updateHallway(hallway);
+                return hallway;
+            }
+
+            function updateHallway(hallway) {
+                const posA = getAnchorWorldPos(hallway.roomA, hallway.anchorAPos, 0);
+                const posB = getAnchorWorldPos(hallway.roomB, hallway.anchorBPos, 0);
+
+                hallway.anchorA.style.left = posA.x + "px";
+                hallway.anchorA.style.top = posA.y + "px";
+                hallway.anchorB.style.left = posB.x + "px";
+                hallway.anchorB.style.top = posB.y + "px";
+
+                const dx = posB.x - posA.x;
+                const dy = posB.y - posA.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                const midX = (posA.x + posB.x) / 2;
+                const midY = (posA.y + posB.y) / 2;
+                const thickness = 22;
+
+                if (length < 5) {
+                    hallway.element.style.width = "20px";
+                    hallway.element.style.height = "20px";
+                    hallway.element.style.left = (posA.x - 10) + "px";
+                    hallway.element.style.top = (posA.y - 10) + "px";
+                    hallway.element.style.transform = "rotate(0deg)";
+                } else {
+                    hallway.element.style.width = length + "px";
+                    hallway.element.style.height = thickness + "px";
+                    hallway.element.style.left = (midX - length / 2) + "px";
+                    hallway.element.style.top = (midY - thickness / 2) + "px";
+                    hallway.element.style.transform = `rotate(${angle}deg)`;
+                }
+
+                updateWallCut(hallway.wallA, hallway.roomA, posA);
+                updateWallCut(hallway.wallB, hallway.roomB, posB);
+            }
+
+            function addHallway(roomA, roomB) {
+                if (roomA === roomB) return false;
+                for (let h of hallways) {
+                    if ((h.roomA === roomA && h.roomB === roomB) || (h.roomA === roomB && h.roomB === roomA)) return false;
+                }
+                const hallway = createHallwayWithAnchors(roomA, roomB);
+                hallways.push(hallway);
+                renderConnectionList();
+                updateConnectionLabels();
+                saveState();
+                return true;
+            }
+
+            function removeHallway(hallway) {
+                hallway.element.remove();
+                hallway.anchorA.remove();
+                hallway.anchorB.remove();
+                hallway.wallA.remove();
+                hallway.wallB.remove();
+                const idx = hallways.indexOf(hallway);
+                if (idx !== -1) hallways.splice(idx, 1);
+                renderConnectionList();
+                updateConnectionLabels();
+                saveState();
+            }
+
+            function updateAllHallways() {
+                hallways.forEach(h => updateHallway(h));
+            }
+
+            function updateAllConnections() {
+                updateAllDoors();
+                updateAllHallways();
+                updateConnectionLabels();
+            }
+
+            // ============================================================
+            // RENDER CONNECTION LIST
+            // ============================================================
+            function renderConnectionList() {
+                const container = document.getElementById("connectionList");
+                const all = [...doors.map(d => ({ ...d, type: "door" })), ...hallways.map(h => ({ ...h, type: "hallway" }))];
+                if (all.length === 0) {
+                    container.innerHTML =
+                        `<div style="color:var(--text-muted); font-size:12px; padding:6px 0;">no connections yet</div>`;
+                    return;
+                }
+                let html = "";
+                all.forEach((item, idx) => {
+                    const nameA = item.roomA.name || "Room";
+                    const nameB = item.roomB.name || "Room";
+                    const typeLabel = item.type === "door" ? "🚪" : "🛤️";
+                    html += `
+                            <div class="connection-item">
+                                <span>${typeLabel} ${escapeHtml(nameA)} ↔ ${escapeHtml(nameB)} <span class="connection-type">${item.type}</span></span>
+                                <button data-idx="${idx}" data-type="${item.type}" class="conn-remove-btn">✕</button>
+                            </div>
+                        `;
+                });
+                container.innerHTML = html;
+
+                container.querySelectorAll(".conn-remove-btn").forEach(btn => {
+                    btn.addEventListener("click", (e) => {
+                        const idx = parseInt(btn.dataset.idx, 10);
+                        const type = btn.dataset.type;
+                        if (type === "door" && doors[idx]) {
+                            removeDoor(doors[idx]);
+                        } else if (type === "hallway" && hallways[idx]) {
+                            removeHallway(hallways[idx]);
+                        }
+                        updateAllConnections();
+                    });
+                });
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement("div");
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            const defaultColors = ["#4f6bff", "#3bb273", "#e59f3b", "#b45cff", "#e05252", "#3fc1c9", "#f7a072"];
+
+            function getColor(index) {
+                return defaultColors[index % defaultColors.length];
+            }
+
+            // ============================================================
+            // ROOM CRUD
+            // ============================================================
+            function updateAllRooms() {
+                rooms.forEach(room => {
+                    const el = room.element;
+                    el.style.borderWidth = wallThickness + "px";
+                    el.style.borderColor = wallColor;
+                });
+            }
+
+            function renderRoom(room) {
+                const el = room.element;
+                el.style.left = room.x + "px";
+                el.style.top = room.y + "px";
+                el.style.width = room.width + "px";
+                el.style.height = room.height + "px";
+                el.style.background = room.color;
+                el.style.borderWidth = wallThickness + "px";
+                el.style.borderColor = wallColor;
+                el.innerHTML = `
+                        <span class="label">${escapeHtml(room.name)}</span>
+                        <div class="handle"></div>
+                    `;
+            }
+
+            function createRoom(x, y, w, h, name, color) {
+                const el = document.createElement("div");
+                el.className = "room";
+                contentLayer.appendChild(el);
+
+                const room = {
+                    element: el,
+                    name: name || "Room " + (rooms.length + 1),
+                    x: x || 0,
+                    y: y || 0,
+                    width: Math.max(12, w || 60),
+                    height: Math.max(12, h || 60),
+                    color: color || getColor(rooms.length)
+                };
+                room.element.dataset.index = rooms.length;
+                rooms.push(room);
+                renderRoom(room);
+                updateEmptyMessage();
+                return room;
+            }
+
+            function deleteRoom(room) {
+                if (!room) return;
+
+                const toRemoveDoors = doors.filter(d => d.roomA === room || d.roomB === room);
+                toRemoveDoors.forEach(d => removeDoor(d));
+                const toRemoveHallways = hallways.filter(h => h.roomA === room || h.roomB === room);
+                toRemoveHallways.forEach(h => removeHallway(h));
+
+                room.element.remove();
+                const idx = rooms.indexOf(room);
+                if (idx !== -1) rooms.splice(idx, 1);
+                rooms.forEach((r, i) => r.element.dataset.index = i);
+
+                if (selectedRoom === room) {
+                    selectedRoom = null;
+                    updateProperties();
+                }
+                updateEmptyMessage();
+                updateAllConnections();
+                renderConnectionList();
+                highlightConnectionsForRoom(null);
+                updateMiniMap();
+                saveState();
+            }
+
+            function duplicateRoom(room, offset = 30) {
+                if (!room) return;
+                const newRoom = createRoom(
+                    room.x + offset,
+                    room.y + offset,
+                    room.width,
+                    room.height,
+                    room.name + " (copy)",
+                    room.color
+                );
+                selectRoom(newRoom);
+                updateMiniMap();
+                saveState();
+                showToast("📋 Room duplicated");
+                return newRoom;
+            }
+
+            function selectRoom(room) {
+                if (selectedRoom) {
+                    selectedRoom.element.classList.remove("selected");
+                }
+                selectedRoom = room;
+                if (selectedRoom) {
+                    selectedRoom.element.classList.add("selected");
+                    highlightConnectionsForRoom(room);
+                } else {
+                    highlightConnectionsForRoom(null);
+                }
+                updateProperties();
+                updateEmptyMessage();
+            }
+
+            function updateEmptyMessage() {
+                const msg = document.getElementById("emptyMessage");
+                if (rooms.length === 0) {
+                    msg.style.display = "block";
+                } else {
+                    msg.style.display = "none";
+                }
+            }
+
+            function updateProperties() {
+                const noSel = document.getElementById("noSelection");
+                const props = document.getElementById("properties");
+
+                if (!selectedRoom) {
+                    noSel.style.display = "block";
+                    props.style.display = "none";
+                    return;
+                }
+
+                noSel.style.display = "none";
+                props.style.display = "block";
+
+                document.getElementById("roomName").value = selectedRoom.name;
+                document.getElementById("roomColor").value = selectedRoom.color;
+                document.getElementById("roomX").value = Math.round(selectedRoom.x);
+                document.getElementById("roomY").value = Math.round(selectedRoom.y);
+                document.getElementById("roomWidth").value = Math.round(selectedRoom.width);
+                document.getElementById("roomHeight").value = Math.round(selectedRoom.height);
+            }
+
+            // ============================================================
+            // MODE SWITCHING
+            // ============================================================
+            function setMode(newMode) {
+                mode = newMode;
+                document.getElementById("drawTool").classList.toggle("active", mode === "draw");
+                document.getElementById("selectTool").classList.toggle("active", mode === "select");
+                document.getElementById("doorTool").classList.toggle("active", mode === "door");
+                document.getElementById("hallwayTool").classList.toggle("active", mode === "hallway");
+                document.getElementById("drawToolSide").classList.toggle("active", mode === "draw");
+                document.getElementById("selectToolSide").classList.toggle("active", mode === "select");
+                document.getElementById("doorToolSide").classList.toggle("active", mode === "door");
+                document.getElementById("hallwayToolSide").classList.toggle("active", mode === "hallway");
+
+                workspace.style.cursor = mode === "draw" ? "crosshair" : (mode === "select" ? "default" : "pointer");
+
+                connectionFirstRoom = null;
+                document.querySelectorAll(".door.highlight, .hallway.highlight").forEach(el => el.classList.remove(
+                "highlight"));
+                if (mode === "draw") {
+                    selectRoom(null);
+                }
+                contextMenu.style.display = "none";
+            }
+
+            // ============================================================
+            // EVENT BINDING
+            // ============================================================
+            document.getElementById("drawTool").onclick = () => setMode("draw");
+            document.getElementById("selectTool").onclick = () => setMode("select");
+            document.getElementById("doorTool").onclick = () => setMode("door");
+            document.getElementById("hallwayTool").onclick = () => setMode("hallway");
+            document.getElementById("drawToolSide").onclick = () => setMode("draw");
+            document.getElementById("selectToolSide").onclick = () => setMode("select");
+            document.getElementById("doorToolSide").onclick = () => setMode("door");
+            document.getElementById("hallwayToolSide").onclick = () => setMode("hallway");
+
+            document.getElementById("undoBtn").onclick = undo;
+            document.getElementById("redoBtn").onclick = redo;
+
+            // ============================================================
+            // KEYBOARD SHORTCUTS
+            // ============================================================
+            document.addEventListener("keydown", (e) => {
+                if (e.ctrlKey && e.key === 'z') { e.preventDefault();
+                    undo(); return; }
+                if (e.ctrlKey && e.key === 'y') { e.preventDefault();
+                    redo(); return; }
+                if (e.ctrlKey && e.key === 'd') { e.preventDefault();
+                    if (selectedRoom) duplicateRoom(selectedRoom);
+                    return; }
+
+                if (e.key === '1') { setMode("draw");
+                    e.preventDefault(); return; }
+                if (e.key === '2') { setMode("select");
+                    e.preventDefault(); return; }
+                if (e.key === '3') { setMode("door");
+                    e.preventDefault(); return; }
+                if (e.key === '4') { setMode("hallway");
+                    e.preventDefault(); return; }
+
+                if (e.key === "Delete") {
+                    if (selectedRoom) {
+                        deleteRoom(selectedRoom);
+                        showToast("🗑 Room deleted");
+                    }
+                }
+
+                if (e.key === 'Escape') {
+                    contextMenu.style.display = 'none';
+                    roomTooltip.style.display = 'none';
+                }
+            });
+
+            // ============================================================
+            // ROOM TOOLTIP (HOVER PREVIEW)
+            // ============================================================
+            let tooltipTimeout = null;
+
+            workspace.addEventListener("mouseover", (e) => {
+                const roomEl = e.target.closest(".room");
+                if (!roomEl) {
+                    roomTooltip.style.display = 'none';
+                    clearTimeout(tooltipTimeout);
+                    return;
+                }
+
+                const index = Number(roomEl.dataset.index);
+                const room = rooms[index];
+                if (!room) return;
+
+                clearTimeout(tooltipTimeout);
+                tooltipTimeout = setTimeout(() => {
+                    tooltipName.innerHTML =
+                        `<span class="color-swatch" style="background:${room.color}"></span> ${escapeHtml(room.name)}`;
+                    tooltipDetails.textContent =
+                        `Size: ${Math.round(room.width)}×${Math.round(room.height)}  ·  #${rooms.indexOf(room) + 1}`;
+
+                    let left = e.clientX + 16;
+                    let top = e.clientY - 10;
+
+                    const tipRect = roomTooltip.getBoundingClientRect();
+                    if (left + 160 > window.innerWidth) left = e.clientX - 170;
+                    if (top + 80 > window.innerHeight) top = window.innerHeight - 90;
+                    if (top < 10) top = 10;
+
+                    roomTooltip.style.left = left + 'px';
+                    roomTooltip.style.top = top + 'px';
+                    roomTooltip.style.display = 'block';
+                }, 300);
+            });
+
+            workspace.addEventListener("mouseout", (e) => {
+                const roomEl = e.target.closest(".room");
+                if (!roomEl) {
+                    clearTimeout(tooltipTimeout);
+                    roomTooltip.style.display = 'none';
+                }
+            });
+
+            // ============================================================
+            // CONTEXT MENU
+            // ============================================================
+            let contextTargetRoom = null;
+
+            workspace.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                const roomEl = e.target.closest(".room");
+                if (!roomEl) {
+                    contextMenu.style.display = 'none';
+                    return;
+                }
+
+                const index = Number(roomEl.dataset.index);
+                contextTargetRoom = rooms[index];
+                if (!contextTargetRoom) return;
+
+                contextMenu.style.left = e.clientX + 'px';
+                contextMenu.style.top = e.clientY + 'px';
+                contextMenu.style.display = 'block';
+
+                const isSelected = contextTargetRoom === selectedRoom;
+                const items = contextMenu.querySelectorAll('.menu-item');
+                items.forEach(item => {
+                    const action = item.dataset.action;
+                    if (action === 'select') {
+                        item.textContent = isSelected ? '✓ Selected' : '↖ Select';
+                    }
+                });
+            });
+
+            contextMenu.addEventListener("click", (e) => {
+                const item = e.target.closest('.menu-item');
+                if (!item) return;
+                const action = item.dataset.action;
+
+                if (!contextTargetRoom) return;
+
+                switch (action) {
+                    case 'select':
+                        if (contextTargetRoom) {
+                            selectRoom(contextTargetRoom);
+                            showToast(`↖ Selected: ${contextTargetRoom.name}`);
+                        }
+                        break;
+                    case 'duplicate':
+                        if (contextTargetRoom) {
+                            duplicateRoom(contextTargetRoom);
+                        }
+                        break;
+                    case 'rename':
+                        if (contextTargetRoom) {
+                            const newName = prompt('Enter new name:', contextTargetRoom.name);
+                            if (newName && newName.trim()) {
+                                contextTargetRoom.name = newName.trim();
+                                renderRoom(contextTargetRoom);
+                                updateProperties();
+                                renderConnectionList();
+                                updateMiniMap();
+                                saveState();
+                                showToast(`✏️ Renamed to: ${contextTargetRoom.name}`);
+                            }
+                        }
+                        break;
+                    case 'color':
+                        if (contextTargetRoom) {
+                            const colorInput = document.createElement('input');
+                            colorInput.type = 'color';
+                            colorInput.value = contextTargetRoom.color;
+                            colorInput.addEventListener('input', () => {
+                                contextTargetRoom.color = colorInput.value;
+                                renderRoom(contextTargetRoom);
+                                updateProperties();
+                                updateMiniMap();
+                                saveState();
+                            });
+                            colorInput.click();
+                            showToast('🎨 Pick a color');
+                        }
+                        break;
+                    case 'delete':
+                        if (contextTargetRoom) {
+                            if (confirm(`Delete "${contextTargetRoom.name}"?`)) {
+                                deleteRoom(contextTargetRoom);
+                                showToast(`🗑 Deleted: ${contextTargetRoom.name}`);
+                            }
+                        }
+                        break;
+                }
+
+                contextMenu.style.display = 'none';
+                contextTargetRoom = null;
+            });
+
+            document.addEventListener("click", (e) => {
+                if (!contextMenu.contains(e.target)) {
+                    contextMenu.style.display = 'none';
+                }
+            });
+
+            // ============================================================
+            // DRAWING
+            // ============================================================
+            let tempRoom = null;
+
+            workspace.addEventListener("mousedown", (e) => {
+                if (e.button === 1 || e.button === 2) {
+                    e.preventDefault();
+                    isPanning = true;
+                    panStartX = e.clientX;
+                    panStartY = e.clientY;
+                    panStartCamX = camera.x;
+                    panStartCamY = camera.y;
+                    contextMenu.style.display = 'none';
+                    return;
+                }
+
+                if (e.button !== 0) return;
+
+                const target = e.target;
+                const roomEl = target.closest(".room");
+
+                if (roomEl) return;
+
+                if (mode === "select") {
+                    selectRoom(null);
+                    contextMenu.style.display = 'none';
+                    return;
+                }
+
+                if (mode === "door" || mode === "hallway") {
+                    connectionFirstRoom = null;
+                    document.querySelectorAll(".room").forEach(el => el.style.boxShadow = "");
+                    contextMenu.style.display = 'none';
+                    return;
+                }
+
+                if (mode !== "draw") {
+                    selectRoom(null);
+                    contextMenu.style.display = 'none';
+                    return;
+                }
+
+                const p = getMousePosition(e);
+                startX = snapToGrid(p.x);
+                startY = snapToGrid(p.y);
+
+                const color = getColor(rooms.length);
+                tempRoom = createRoom(startX, startY, 1, 1, "Room " + (rooms.length + 1), color);
+                drawing = true;
+                selectedRoom = tempRoom;
+                updateProperties();
+            });
+
+            workspace.addEventListener("mousemove", (e) => {
+                if (isPanning) {
+                    const dx = e.clientX - panStartX;
+                    const dy = e.clientY - panStartY;
+                    camera.x = panStartCamX + dx;
+                    camera.y = panStartCamY + dy;
+                    updateCamera();
+                    return;
+                }
+
+                if (!drawing || !tempRoom) return;
+                const p = getMousePosition(e);
+                let x = Math.min(startX, snapToGrid(p.x));
+                let y = Math.min(startY, snapToGrid(p.y));
+                let w = Math.abs(snapToGrid(p.x) - startX);
+                let h = Math.abs(snapToGrid(p.y) - startY);
+                w = Math.max(12, w);
+                h = Math.max(12, h);
+                tempRoom.x = x;
+                tempRoom.y = y;
+                tempRoom.width = w;
+                tempRoom.height = h;
+                renderRoom(tempRoom);
+                updateProperties();
+            });
+
+            workspace.addEventListener("mouseup", (e) => {
+                if (e.button === 1 || e.button === 2) {
+                    isPanning = false;
+                    return;
+                }
+
+                if (!drawing || !tempRoom) {
+                    drawing = false;
+                    return;
+                }
+                drawing = false;
+
+                if (tempRoom.width < 18 || tempRoom.height < 18) {
+                    deleteRoom(tempRoom);
+                    tempRoom = null;
+                    updateProperties();
+                    updateEmptyMessage();
+                    return;
+                }
+
+                setMode("select");
+                selectRoom(tempRoom);
+                tempRoom = null;
+                updateEmptyMessage();
+                updateAllConnections();
+                updateMiniMap();
+                saveState();
+            });
+
+            // ============================================================
+            // ROOM CLICK HANDLER
+            // ============================================================
+            workspace.addEventListener("mousedown", (e) => {
+                if (e.button !== 0) return;
+                const roomEl = e.target.closest(".room");
+                if (!roomEl) return;
+
+                const index = Number(roomEl.dataset.index);
+                const room = rooms[index];
+                if (!room) return;
+
+                if (mode === "door" || mode === "hallway") {
+                    e.stopPropagation();
+                    if (e.target.classList.contains("handle")) return;
+
+                    if (!connectionFirstRoom) {
+                        connectionFirstRoom = room;
+                        room.element.style.boxShadow = "0 0 0 3px #ffd966, 0 0 20px #f5b042";
+                        setTimeout(() => {
+                            room.element.style.boxShadow = "";
+                        }, 400);
+                        return;
+                    }
+
+                    const roomA = connectionFirstRoom;
+                    const roomB = room;
+                    let ok = false;
+                    if (mode === "door") {
+                        ok = addDoor(roomA, roomB);
+                    } else {
+                        ok = addHallway(roomA, roomB);
+                    }
+                    if (ok) {
+                        const allConns = mode === "door" ? doors : hallways;
+                        const last = allConns[allConns.length - 1];
+                        last.element.classList.add("highlight");
+                        setTimeout(() => last.element.classList.remove("highlight"), 600);
+                        updateAllConnections();
+                        renderConnectionList();
+                        updateMiniMap();
+                        saveState();
+                    } else {
+                        alert(roomA === roomB ? "Can't connect a room to itself." :
+                            "Connection already exists between these rooms.");
+                    }
+                    connectionFirstRoom = null;
+                    document.querySelectorAll(".room").forEach(el => el.style.boxShadow = "");
+                    return;
+                }
+
+                if (mode === "draw") return;
+
+                if (e.target.classList.contains("handle")) {
+                    e.stopPropagation();
+                    resizeStart(e, room);
+                    return;
+                }
+
+                e.stopPropagation();
+
+                selectRoom(room);
+                moveStart(e, room);
+            });
+
+            // ============================================================
+            // MOVE LOGIC
+            // ============================================================
+            let moving = false;
+            let dragOffX = 0,
+                dragOffY = 0;
+            let moveStartPos = null;
+
+            function moveStart(e, room) {
+                moving = true;
+                const p = getMousePosition(e);
+                dragOffX = p.x - room.x;
+                dragOffY = p.y - room.y;
+                moveStartPos = { room, x: room.x, y: room.y };
+
+                document.addEventListener("mousemove", moveMove);
+                document.addEventListener("mouseup", moveEnd);
+            }
+
+            function moveMove(e) {
+                if (!moving || !moveStartPos) return;
+                const p = getMousePosition(e);
+
+                const dx = p.x - dragOffX - moveStartPos.x;
+                const dy = p.y - dragOffY - moveStartPos.y;
+
+                const newX = snapToGrid(moveStartPos.x + dx);
+                const newY = snapToGrid(moveStartPos.y + dy);
+                moveStartPos.room.x = Math.max(0, newX);
+                moveStartPos.room.y = Math.max(0, newY);
+                renderRoom(moveStartPos.room);
+
+                updateProperties();
+                updateAllConnections();
+                updateMiniMap();
+            }
+
+            function moveEnd() {
+                moving = false;
+                document.removeEventListener("mousemove", moveMove);
+                document.removeEventListener("mouseup", moveEnd);
+                if (moveStartPos) {
+                    saveState();
+                }
+                moveStartPos = null;
+            }
+
+            // ============================================================
+            // RESIZE LOGIC
+            // ============================================================
+            let resizing = false;
+            let resizeStartX = 0,
+                resizeStartY = 0;
+            let origW = 0,
+                origH = 0;
+
+            function resizeStart(e, room) {
+                resizing = true;
+                const p = getMousePosition(e);
+                resizeStartX = p.x;
+                resizeStartY = p.y;
+                origW = room.width;
+                origH = room.height;
+                document.addEventListener("mousemove", resizeMove);
+                document.addEventListener("mouseup", resizeEnd);
+            }
+
+            function resizeMove(e) {
+                if (!resizing || !selectedRoom) return;
+                const p = getMousePosition(e);
+                let w = Math.max(12, snapToGrid(origW + (p.x - resizeStartX)));
+                let h = Math.max(12, snapToGrid(origH + (p.y - resizeStartY)));
+                selectedRoom.width = w;
+                selectedRoom.height = h;
+                renderRoom(selectedRoom);
+                updateProperties();
+                updateAllConnections();
+                updateMiniMap();
+            }
+
+            function resizeEnd() {
+                resizing = false;
+                document.removeEventListener("mousemove", resizeMove);
+                document.removeEventListener("mouseup", resizeEnd);
+                saveState();
+            }
+
+            // ============================================================
+            // PROPERTY INPUTS
+            // ============================================================
+            function bindNumberInput(id, prop) {
+                const el = document.getElementById(id);
+                el.addEventListener("input", () => {
+                    if (!selectedRoom) return;
+                    let val = parseFloat(el.value);
+                    if (isNaN(val)) return;
+                    if (prop === "width" || prop === "height") val = Math.max(12, val);
+                    if (prop === "x" || prop === "y") val = Math.max(0, val);
+                    selectedRoom[prop] = val;
+                    renderRoom(selectedRoom);
+                    updateAllConnections();
+                    updateMiniMap();
+                    saveState();
+                });
+            }
+
+            bindNumberInput("roomX", "x");
+            bindNumberInput("roomY", "y");
+            bindNumberInput("roomWidth", "width");
+            bindNumberInput("roomHeight", "height");
+
+            document.getElementById("roomName").addEventListener("input", (e) => {
+                if (!selectedRoom) return;
+                selectedRoom.name = e.target.value || "Unnamed";
+                renderRoom(selectedRoom);
+                renderConnectionList();
+                updateMiniMap();
+                saveState();
+            });
+
+            document.getElementById("roomColor").addEventListener("input", (e) => {
+                if (!selectedRoom) return;
+                selectedRoom.color = e.target.value;
+                renderRoom(selectedRoom);
+                updateMiniMap();
+                saveState();
+            });
+
+            // ============================================================
+            // DELETE / CLEAR / EXPORT / IMPORT
+            // ============================================================
+            document.getElementById("deleteButton").onclick = () => {
+                if (selectedRoom) {
+                    deleteRoom(selectedRoom);
+                    showToast("🗑 Room deleted");
+                }
+            };
+            document.getElementById("deleteProperty").onclick = () => {
+                if (selectedRoom) {
+                    deleteRoom(selectedRoom);
+                    showToast("🗑 Room deleted");
+                }
+            };
+
+            document.getElementById("duplicateProperty").onclick = () => {
+                if (selectedRoom) duplicateRoom(selectedRoom);
+            };
+
+            document.getElementById("clearButton").onclick = () => {
+                if (rooms.length === 0 && doors.length === 0 && hallways.length === 0) return;
+                if (!confirm("Delete all rooms and connections?")) return;
+                rooms.forEach(r => r.element.remove());
+                rooms.length = 0;
+                doors.forEach(d => {
+                    d.element.remove();
+                    d.anchorA.remove();
+                    d.anchorB.remove();
+                    d.wallA.remove();
+                    d.wallB.remove();
+                });
+                doors.length = 0;
+                hallways.forEach(h => {
+                    h.element.remove();
+                    h.anchorA.remove();
+                    h.anchorB.remove();
+                    h.wallA.remove();
+                    h.wallB.remove();
+                });
+                hallways.length = 0;
+                document.querySelectorAll('.connection-label').forEach(el => el.remove());
+                selectedRoom = null;
+                updateProperties();
+                updateEmptyMessage();
+                updateAllConnections();
+                renderConnectionList();
+                highlightConnectionsForRoom(null);
+                updateMiniMap();
+                saveState();
+                showToast("🗑 All cleared");
+            };
+
+            document.getElementById("exportBtn").onclick = exportLevel;
+            document.getElementById("importBtn").onclick = () => {
+                document.getElementById("fileInput").click();
+            };
+            document.getElementById("fileInput").addEventListener("change", (e) => {
+                if (e.target.files.length > 0) {
+                    importLevel(e.target.files[0]);
+                    e.target.value = '';
+                }
+            });
+
+            // ============================================================
+            // ZOOM CONTROLS
+            // ============================================================
+            document.getElementById("zoomInBtn").onclick = () => {
+                camera.zoom = Math.min(2, camera.zoom + 0.1);
+                updateCamera();
+            };
+            document.getElementById("zoomOutBtn").onclick = () => {
+                camera.zoom = Math.max(0.2, camera.zoom - 0.1);
+                updateCamera();
+            };
+            document.getElementById("resetViewBtn").onclick = () => {
+                camera.x = 0;
+                camera.y = 0;
+                camera.zoom = 1;
+                updateCamera();
+            };
+            document.getElementById("fitViewBtn").onclick = () => {
+                if (rooms.length === 0) return;
+                let minX = Infinity,
+                    minY = Infinity,
+                    maxX = -Infinity,
+                    maxY = -Infinity;
+                rooms.forEach(r => {
+                    minX = Math.min(minX, r.x);
+                    minY = Math.min(minY, r.y);
+                    maxX = Math.max(maxX, r.x + r.width);
+                    maxY = Math.max(maxY, r.y + r.height);
+                });
+                const pad = 50;
+                const width = maxX - minX + pad * 2;
+                const height = maxY - minY + pad * 2;
+                const workspaceRect = workspace.getBoundingClientRect();
+                const scaleX = (workspaceRect.width - 40) / width;
+                const scaleY = (workspaceRect.height - 40) / height;
+                const zoom = Math.min(1, Math.min(scaleX, scaleY));
+                camera.zoom = zoom;
+                camera.x = (workspaceRect.width - width * zoom) / 2 - minX * zoom + pad * zoom / 2;
+                camera.y = (workspaceRect.height - height * zoom) / 2 - minY * zoom + pad * zoom / 2;
+                updateCamera();
+                showToast("⊡ Fit to view");
+            };
+
+            // ============================================================
+            // MOUSE WHEEL ZOOM
+            // ============================================================
+            workspace.addEventListener("wheel", (e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -0.08 : 0.08;
+                camera.zoom = Math.min(2, Math.max(0.2, camera.zoom + delta));
+                updateCamera();
+            }, { passive: false });
+
+            // ============================================================
+            // MINI-MAP
+            // ============================================================
+            function updateMiniMap() {
+                const canvas = miniMapCanvas;
+                const ctx = canvas.getContext('2d');
+                canvas.width = canvas.clientWidth * 2;
+                canvas.height = canvas.clientHeight * 2;
+
+                if (rooms.length === 0) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    ctx.fillStyle = isDark ? '#1a1d26' : '#e8ecf2';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = isDark ? '#434b5c' : '#8a94a8';
+                    ctx.font = '12px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('🏚️ empty', canvas.width / 2, canvas.height / 2 + 4);
+                    miniViewport.style.display = 'none';
+                    return;
+                }
+
+                let minX = Infinity,
+                    minY = Infinity,
+                    maxX = -Infinity,
+                    maxY = -Infinity;
+                rooms.forEach(r => {
+                    minX = Math.min(minX, r.x);
+                    minY = Math.min(minY, r.y);
+                    maxX = Math.max(maxX, r.x + r.width);
+                    maxY = Math.max(maxY, r.y + r.height);
+                });
+                const pad = 20;
+                minX -= pad;
+                minY -= pad;
+                maxX += pad;
+                maxY += pad;
+                const totalW = maxX - minX;
+                const totalH = maxY - minY;
+
+                const scaleX = canvas.width / totalW;
+                const scaleY = canvas.height / totalH;
+                const scale = Math.min(scaleX, scaleY) * 0.9;
+
+                const offsetX = (canvas.width - totalW * scale) / 2 - minX * scale;
+                const offsetY = (canvas.height - totalH * scale) / 2 - minY * scale;
+
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = isDark ? '#1a1d26' : '#e8ecf2';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const allConns = [...doors, ...hallways];
+                allConns.forEach(conn => {
+                    const pA = getAnchorWorldPos(conn.roomA, conn.anchorAPos || { x: 0.5, y: 0.5 },
+                        conn.type === 'door' ? doorOffset : 0);
+                    const pB = getAnchorWorldPos(conn.roomB, conn.anchorBPos || { x: 0.5, y: 0.5 },
+                        conn.type === 'door' ? doorOffset : 0);
+                    const ax = pA.x * scale + offsetX;
+                    const ay = pA.y * scale + offsetY;
+                    const bx = pB.x * scale + offsetX;
+                    const by = pB.y * scale + offsetY;
+                    ctx.strokeStyle = conn.type === 'door' ? '#d4b68a88' : '#6a7a8e88';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(ax, ay);
+                    ctx.lineTo(bx, by);
+                    ctx.stroke();
+                });
+
+                rooms.forEach(room => {
+                    const x = room.x * scale + offsetX;
+                    const y = room.y * scale + offsetY;
+                    const w = room.width * scale;
+                    const h = room.height * scale;
+
+                    ctx.fillStyle = room.color || '#4f6bff';
+                    ctx.fillRect(x, y, Math.max(2, w), Math.max(2, h));
+                    ctx.strokeStyle = isDark ? '#ffffff44' : '#00000022';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x, y, Math.max(2, w), Math.max(2, h));
+
+                    if (w > 20 && h > 12) {
+                        ctx.fillStyle = isDark ? '#ffffffcc' : '#000000cc';
+                        ctx.font = `${Math.min(10, w/5)}px sans-serif`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        const name = room.name.length > 10 ? room.name.slice(0, 8) + '…' : room.name;
+                        ctx.fillText(name, x + w / 2, y + h / 2);
+                    }
+                });
+
+                const viewRect = workspace.getBoundingClientRect();
+                const vx = -camera.x / camera.zoom * scale + offsetX;
+                const vy = -camera.y / camera.zoom * scale + offsetY;
+                const vw = viewRect.width / camera.zoom * scale;
+                const vh = viewRect.height / camera.zoom * scale;
+
+                miniViewport.style.display = 'block';
+                miniViewport.style.left = (vx / (canvas.width / canvas.clientWidth)) + 'px';
+                miniViewport.style.top = (vy / (canvas.height / canvas.clientHeight)) + 'px';
+                miniViewport.style.width = (vw / (canvas.width / canvas.clientWidth)) + 'px';
+                miniViewport.style.height = (vh / (canvas.height / canvas.clientHeight)) + 'px';
+            }
+
+            miniMapCanvas.addEventListener('click', (e) => {
+                const rect = miniMapCanvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+
+                if (rooms.length === 0) return;
+                let minX = Infinity,
+                    minY = Infinity,
+                    maxX = -Infinity,
+                    maxY = -Infinity;
+                rooms.forEach(r => {
+                    minX = Math.min(minX, r.x);
+                    minY = Math.min(minY, r.y);
+                    maxX = Math.max(maxX, r.x + r.width);
+                    maxY = Math.max(maxY, r.y + r.height);
+                });
+                const pad = 20;
+                minX -= pad;
+                minY -= pad;
+                maxX += pad;
+                maxY += pad;
+                const totalW = maxX - minX;
+                const totalH = maxY - minY;
+
+                const workspaceRect = workspace.getBoundingClientRect();
+                const centerX = minX + totalW * x;
+                const centerY = minY + totalH * y;
+
+                camera.x = workspaceRect.width / 2 - centerX * camera.zoom;
+                camera.y = workspaceRect.height / 2 - centerY * camera.zoom;
+                updateCamera();
+            });
+
+            // ============================================================
+            // INIT
+            // ============================================================
+            function initDemo() {
+                const r1 = createRoom(60, 60, 160, 100, "Great Hall", "#4f6bff");
+                const r2 = createRoom(320, 80, 120, 140, "Library", "#3bb273");
+                const r3 = createRoom(520, 60, 100, 80, "Armory", "#e59f3b");
+                const r4 = createRoom(150, 250, 200, 90, "Throne Room", "#b45cff");
+                const r5 = createRoom(480, 280, 140, 100, "Treasure Vault", "#e05252");
+                const r6 = createRoom(700, 150, 120, 120, "Barracks", "#3fc1c9");
+                addDoor(r1, r2);
+                addHallway(r2, r3);
+                addDoor(r1, r4);
+                addHallway(r4, r5);
+                addDoor(r3, r5);
+                addDoor(r2, r6);
+                addHallway(r5, r6);
+                selectRoom(r1);
+                setMode("select");
+                updateAllConnections();
+                renderConnectionList();
+                updateCamera();
+                updateMiniMap();
+                saveState();
+            }
+            initDemo();
+
+            workspace.addEventListener("contextmenu", (e) => e.preventDefault());
+
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(updateMiniMap, 200);
+            });
+
+            setInterval(() => {
+                if (!moving && !resizing && !drawing) {
+                    updateAllConnections();
+                }
+            }, 500);
+
+            setInterval(updateMiniMap, 1000);
+
+        })();
+    </script>
+</body>
+</html>
