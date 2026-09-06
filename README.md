@@ -2,7 +2,7 @@
 
 Pixel Forge is a browser-based dungeon level designer for game developers, RPG creators, and world-builders. You can create intricate dungeon layouts with a drag-and-drop interface, edit in real time, and export or import your work.
 
-It works well for tabletop RPGs, video game level design, and quick prototyping. The project is maintained by [Pixel Clover](https://github.com/pixelclover).
+It works well for tabletop RPGs, video game level design, and quick prototyping. The project is maintained by [Pixel Clover](https://github.com/pixel-clover).
 
 ## Features
 
@@ -52,4 +52,4 @@ https://pixel-clover.github.io/pixel-forge/
 Clone the repository:
 
 ```bash
-git clone https://github.com/pixelclover/pixel-forge.git
+git clone https://github.com/pixel-clover/pixel-forge.git
